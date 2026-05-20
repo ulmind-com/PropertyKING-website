@@ -86,10 +86,10 @@ export default function Footer() {
       </div>
 
       {/* Designed by UlMind */}
-      <div className="container-custom flex items-center justify-center gap-2 py-4 border-t border-white/[0.04] text-[12px] text-neutral-600">
+      <div className="container-custom flex items-center justify-center gap-2.5 py-4 border-t border-white/[0.04] text-[12px] text-neutral-600">
         <span>Designed & Built by</span>
-        <a href="https://www.ulmind.com" target="_blank" rel="noopener noreferrer" className="opacity-70 transition-opacity hover:opacity-100">
-          <img src="/ulmind.png" alt="UlMind" className="h-[18px] w-auto object-contain" />
+        <a href="https://www.ulmind.com" target="_blank" rel="noopener noreferrer" className="transition-opacity hover:opacity-80">
+          <img src="/ulmind.png" alt="UlMind" className="h-[28px] w-auto object-contain" />
         </a>
       </div>
     </footer>

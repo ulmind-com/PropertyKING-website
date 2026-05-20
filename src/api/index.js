@@ -32,6 +32,8 @@ api.interceptors.response.use(
 
 // ─── Auth ───
 export const authAPI = {
+  requestOTP: (data) => api.post('/auth/request-otp', data),
+  verifyOTP: (data) => api.post('/auth/verify-otp', data),
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
   googleAuth: (token) => api.post('/auth/google', { token }),
@@ -51,6 +53,7 @@ export const userAPI = {
   },
   updateFCMToken: (token) => api.put('/users/me/fcm-token', { fcm_token: token }),
   getPublicProfile: (userId) => api.get(`/users/${userId}/public`),
+  deleteAccount: () => api.delete('/users/me'),
 };
 
 // ─── Properties ───
@@ -63,6 +66,8 @@ export const propertyAPI = {
   nearby: (params) => api.get('/properties/nearby', { params }),
   recommendations: (params) => api.get('/properties/recommendations', { params }),
   myListings: (params) => api.get('/properties/my-listings', { params }),
+  topViewed: (params) => api.get('/properties/top-viewed', { params }),
+  toggleStatus: (id) => api.put(`/properties/${id}/toggle-status`),
 };
 
 // ─── Property Types ───
@@ -101,6 +106,8 @@ export const notificationAPI = {
   list: (params) => api.get('/notifications', { params }),
   markRead: (id) => api.put(`/notifications/${id}/read`),
   markAllRead: () => api.put('/notifications/read-all'),
+  delete: (id) => api.delete(`/notifications/${id}`),
+  deleteAll: () => api.delete('/notifications'),
 };
 
 // ─── Upload ───

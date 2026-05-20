@@ -25,8 +25,8 @@ export default function Register() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
-  const [countryCode, setCountryCode] = useState('IN');
-  const [callingCode, setCallingCode] = useState('91');
+  const [countryCode, setCountryCode] = useState('US');
+  const [callingCode, setCallingCode] = useState('1');
   
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);

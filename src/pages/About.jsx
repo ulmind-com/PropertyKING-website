@@ -13,13 +13,13 @@ export default function About() {
         <div className="absolute -bottom-[40%] left-[15%] w-[260px] h-[260px] rounded-full bg-white/[0.03]" />
         <div className="container-custom relative z-[1] text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/[0.08] backdrop-blur-xl rounded-full text-white/70 text-[13px] font-semibold mb-6">
-            <Award size={14} /> About PropertyKING
+            <Award size={14} /> About PropertyKing
           </div>
           <h1 className="text-[clamp(32px,5vw,52px)] font-black text-white leading-tight tracking-tighter mb-5 max-w-[700px] mx-auto">
             Redefining Real Estate in America
           </h1>
           <p className="text-base text-white/55 max-w-[520px] mx-auto leading-relaxed">
-            PropertyKING is the premium property listing platform built for the modern era —
+            PropertyKing is the premium property listing platform built for the modern era —
             connecting buyers, sellers, and agents with a seamless, beautiful experience.
           </p>
         </div>
@@ -43,7 +43,7 @@ export default function About() {
                 to create the most intuitive property search experience in the market.
               </p>
               <p className="text-[15px] text-neutral-500 leading-[1.8]">
-                From luxurious villas to cozy apartments, PropertyKING covers every type of
+                From luxurious villas to cozy apartments, PropertyKing covers every type of
                 property across all 50 states. Every listing is verified by our team to ensure
                 quality and trust.
               </p>
@@ -94,7 +94,7 @@ export default function About() {
               <div className="w-7 h-7 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-900"><TrendingUp size={14} /></div>
               OUR PROCESS
             </div>
-            <h2 className="text-[30px] max-sm:text-2xl font-extrabold text-neutral-900 tracking-tight">How PropertyKING Works</h2>
+            <h2 className="text-[30px] max-sm:text-2xl font-extrabold text-neutral-900 tracking-tight">How PropertyKing Works</h2>
           </div>
           <div className="grid grid-cols-3 max-md:grid-cols-1 gap-8">
             {[
@@ -122,7 +122,7 @@ export default function About() {
             <div className="relative z-[1]">
               <h2 className="text-[28px] max-sm:text-2xl font-extrabold text-white mb-4 tracking-tight">Ready to Get Started?</h2>
               <p className="text-base text-white/55 max-w-[440px] mx-auto mb-8 leading-relaxed">
-                Join thousands of users who trust PropertyKING for their real estate needs.
+                Join thousands of users who trust PropertyKing for their real estate needs.
               </p>
               <div className="flex gap-3 justify-center flex-wrap">
                 <Link to="/register" className="btn btn-lg bg-white text-neutral-900 hover:bg-white/90 shadow-none">

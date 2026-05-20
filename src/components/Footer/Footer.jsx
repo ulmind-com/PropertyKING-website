@@ -84,6 +84,15 @@ export default function Footer() {
           ))}
         </div>
       </div>
+
+      {/* Designed by UlMind */}
+      <div className="container-custom flex items-center justify-center gap-2 py-4 border-t border-white/[0.04] text-[12px] text-neutral-600">
+        <span>Designed & Built by</span>
+        <a href="https://www.ulmind.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-neutral-400 font-semibold transition-colors hover:text-white">
+          <img src="/ulmind.png" alt="UlMind" className="h-[18px] w-auto object-contain" />
+          UlMind
+        </a>
+      </div>
     </footer>
   );
 }

@@ -77,7 +77,7 @@ export default function Login() {
         {/* Header Area */}
         <div className="auth-header-area">
           <div className="auth-logo-badge">
-            <Home size={32} />
+            <img src="/logoremovebg.png" alt="PropertyKing" style={{ width: 40, height: 40, objectFit: 'contain' }} />
           </div>
           <h1 className="auth-main-title">Welcome Back</h1>
           <p className="auth-sub-title">Sign in to continue exploring premium properties.</p>

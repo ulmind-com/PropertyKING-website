@@ -420,7 +420,7 @@ export default function Home() {
             <div className="relative z-[1] max-w-[560px] max-lg:max-w-full">
               <h2 className="text-[30px] max-sm:text-2xl font-extrabold text-white mb-3.5 tracking-tight">Ready to List Your Property?</h2>
               <p className="text-base text-white/65 leading-relaxed mb-7">
-                Join thousands of property owners and agents who trust PropertyKING to reach millions of potential buyers and renters across the United States.
+                Join thousands of property owners and agents who trust PropertyKing to reach millions of potential buyers and renters across the United States.
               </p>
               <div className="flex gap-3 flex-wrap max-lg:justify-center">
                 <button className="btn btn-lg bg-white text-neutral-900 hover:bg-white/90 shadow-none" onClick={() => navigate('/register')}>

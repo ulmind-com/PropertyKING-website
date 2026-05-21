@@ -34,15 +34,11 @@ export default function Navbar() {
 
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 shrink-0">
-          <div className={`w-[38px] h-[38px] flex items-center justify-center rounded-xl text-white transition-all
-            ${isTransparent ? 'bg-white/15 border border-white/20' : 'bg-neutral-900'}
-          `}>
-            <Home size={20} />
-          </div>
+          <img src="/logoremovebg.png" alt="PropertyKing" className="h-[38px] w-[38px] object-contain" />
           <span className={`text-[22px] font-extrabold tracking-tight transition-colors
             ${isTransparent ? 'text-white' : 'text-neutral-900'}
           `}>
-            Property<span className="font-black">KING</span>
+            Property<span className="font-black">King</span>
           </span>
         </Link>
 

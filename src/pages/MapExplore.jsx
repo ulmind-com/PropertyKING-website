@@ -204,7 +204,7 @@ export default function MapExplore() {
       )}
 
       {/* Search Bar Overlay */}
-      <div className="absolute top-5 left-5 right-5 z-[1000]">
+      <div className="absolute top-[90px] left-5 right-5 z-[1001]">
         <div className="flex items-center gap-2.5 bg-white rounded-2xl px-4 h-[52px] shadow-xl max-w-[500px]">
           {searching ? <Loader2 size={18} className="text-neutral-400 animate-spin shrink-0" /> : <Search size={18} className="text-neutral-400 shrink-0" />}
           <input
@@ -221,7 +221,7 @@ export default function MapExplore() {
       </div>
 
       {/* Property Count Pill */}
-      <div className="absolute top-[76px] left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-1.5 bg-black/75 px-3.5 py-2 rounded-full backdrop-blur-sm">
+      <div className="absolute top-[155px] left-1/2 -translate-x-1/2 z-[1001] flex items-center gap-1.5 bg-black/75 px-3.5 py-2 rounded-full backdrop-blur-sm">
         <HomeIcon size={14} className="text-white" />
         <span className="text-white text-[12px] font-semibold" style={font}>
           {loading ? '...' : `${properties.length} properties`}

@@ -140,9 +140,6 @@ export default function PropertyCard({ property, onFavoriteToggle }) {
               )}
               <span>{property.lister_name}</span>
             </div>
-            {property.views_count > 0 && (
-              <span className="text-xs text-neutral-400 font-medium">👁 {property.views_count}</span>
-            )}
           </div>
         )}
       </div>

@@ -291,17 +291,17 @@ export default function Home() {
             {(loading || finalNearby.length > 0) && (
               <section className="py-[72px] max-md:py-[52px] bg-neutral-50/50 border-b border-neutral-100">
                 <div className="container-custom">
-                  <div className="flex justify-between items-end mb-9">
-                    <div className="flex flex-col gap-1.5">
+                  <div className="flex justify-between items-end max-sm:items-center mb-9 gap-3">
+                    <div className="flex flex-col gap-1.5 flex-1">
                       <div className="flex items-center gap-2 text-xs font-bold text-neutral-400 uppercase tracking-widest">
                         <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600"><MapPin size={14} /></div>
                         NEAR ME
                       </div>
                       <h2 className="text-[30px] max-sm:text-2xl font-extrabold text-neutral-900 tracking-tight leading-tight">Properties Near You</h2>
-                      <p className="text-[15px] text-neutral-400 mt-1">Explore homes around {locationName}</p>
+                      <p className="text-[15px] max-sm:text-[13px] text-neutral-400 mt-1">Explore homes around {locationName}</p>
                     </div>
-                    <Link to="/map" className="flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors">
-                      View Map <ChevronRight size={16} />
+                    <Link to="/map" className="flex items-center justify-center gap-1 text-[13px] font-bold bg-blue-50 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-100 transition-colors shrink-0 whitespace-nowrap">
+                      View Map <ChevronRight size={14} />
                     </Link>
                   </div>
                   <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] max-md:grid-cols-1 gap-6 stagger-children">
@@ -316,17 +316,17 @@ export default function Home() {
             {/* ─── Featured Properties ─── */}
             <section className="py-[72px] max-md:py-[52px]">
               <div className="container-custom">
-                <div className="flex justify-between items-end mb-9">
-                  <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between items-end max-sm:items-center mb-9 gap-3">
+                  <div className="flex flex-col gap-1.5 flex-1">
                     <div className="flex items-center gap-2 text-xs font-bold text-neutral-400 uppercase tracking-widest">
                       <div className="w-7 h-7 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-900"><Star size={14} /></div>
                       FEATURED
                     </div>
                     <h2 className="text-[30px] max-sm:text-2xl font-extrabold text-neutral-900 tracking-tight leading-tight">Featured Properties</h2>
-                    <p className="text-[15px] text-neutral-400 mt-1">Hand-picked premium listings for you</p>
+                    <p className="text-[15px] max-sm:text-[13px] text-neutral-400 mt-1">Hand-picked premium listings for you</p>
                   </div>
-                  <Link to="/properties" className="flex items-center gap-1.5 text-sm font-semibold text-neutral-500 hover:text-neutral-900 transition-colors">
-                    See all <ChevronRight size={16} />
+                  <Link to="/properties" className="flex items-center justify-center gap-1 text-[13px] font-bold bg-neutral-100 text-neutral-900 px-4 py-2 rounded-full hover:bg-neutral-200 transition-colors shrink-0 whitespace-nowrap">
+                    See all <ChevronRight size={14} />
                   </Link>
                 </div>
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] max-md:grid-cols-1 gap-6 stagger-children">
@@ -349,17 +349,17 @@ export default function Home() {
       {(loading || finalTopViewed.length > 0) && (
         <section className="py-[72px] max-md:py-[52px] bg-neutral-50">
           <div className="container-custom">
-            <div className="flex justify-between items-end mb-9">
-              <div className="flex flex-col gap-1.5">
+            <div className="flex justify-between items-end max-sm:items-center mb-9 gap-3">
+              <div className="flex flex-col gap-1.5 flex-1">
                 <div className="flex items-center gap-2 text-xs font-bold text-neutral-400 uppercase tracking-widest">
                   <div className="w-7 h-7 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-900"><TrendingUp size={14} /></div>
                   TRENDING
                 </div>
-                <h2 className="text-[30px] max-sm:text-2xl font-extrabold text-neutral-900 tracking-tight">Top Viewed</h2>
-                <p className="text-[15px] text-neutral-400 mt-1">Most popular listings right now</p>
+                <h2 className="text-[30px] max-sm:text-2xl font-extrabold text-neutral-900 tracking-tight leading-tight">Top Viewed</h2>
+                <p className="text-[15px] max-sm:text-[13px] text-neutral-400 mt-1">Most popular listings right now</p>
               </div>
-              <Link to="/properties?sort_by=views_count&sort_order=desc" className="flex items-center gap-1.5 text-sm font-semibold text-neutral-500 hover:text-neutral-900 transition-colors">
-                See all <ChevronRight size={16} />
+              <Link to="/properties?sort_by=views_count&sort_order=desc" className="flex items-center justify-center gap-1 text-[13px] font-bold bg-neutral-100 text-neutral-900 px-4 py-2 rounded-full hover:bg-neutral-200 transition-colors shrink-0 whitespace-nowrap">
+                See all <ChevronRight size={14} />
               </Link>
             </div>
             <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] max-md:grid-cols-1 gap-6 stagger-children">

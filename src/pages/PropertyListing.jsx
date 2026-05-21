@@ -190,7 +190,7 @@ export default function PropertyListing() {
 
       {/* ═══ FILTER MODAL — matches app ═══ */}
       {showFilters && (
-        <div className="fixed inset-0 bg-black/50 z-[300] flex items-end justify-center" onClick={() => setShowFilters(false)}>
+        <div className="fixed inset-0 bg-black/50 z-[1100] flex items-end justify-center" onClick={() => setShowFilters(false)}>
           <div className="bg-white w-full max-w-[640px] rounded-t-3xl max-h-[90vh] flex flex-col animate-slide-up"
             style={font} onClick={e => e.stopPropagation()}>
             {/* Header */}

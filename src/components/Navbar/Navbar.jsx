@@ -66,7 +66,7 @@ export default function Navbar() {
               className={`px-4 py-2 text-sm font-medium rounded-xl transition-all
                 ${location.pathname === path
                   ? 'text-neutral-900 bg-neutral-100 font-bold'
-                  : `${isTransparent ? 'text-white hover:text-white/80' : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100'}`
+                  : `${isTransparent ? 'text-white hover:text-white/80 max-md:text-neutral-500 max-md:hover:text-neutral-900 max-md:hover:bg-neutral-100' : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100'}`
                 }
               `}
             >
@@ -162,8 +162,8 @@ export default function Navbar() {
 
           {/* Mobile Menu Toggle */}
           <button
-            className={`hidden max-md:flex items-center justify-center z-[1001] bg-transparent
-              ${isTransparent ? 'text-white' : 'text-neutral-900'}
+            className={`hidden max-md:flex items-center justify-center z-[1001] bg-transparent border-none cursor-pointer
+              ${isTransparent && !menuOpen ? 'text-white' : 'text-neutral-900'}
             `}
             onClick={() => setMenuOpen(!menuOpen)}
           >

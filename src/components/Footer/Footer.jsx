@@ -13,7 +13,7 @@ export default function Footer() {
             <span>Property<span className="text-neutral-300">King</span></span>
           </Link>
           <p className="text-sm leading-relaxed text-neutral-500 max-w-[340px]">
-            The premium property listing platform for the US market.
+            The distressed & off-market property listing platform for the US market.
             Find your dream home, list your property, and connect with
             verified agents — all in one place.
           </p>

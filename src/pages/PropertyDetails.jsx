@@ -331,7 +331,7 @@ export default function PropertyDetails() {
           <div className="mb-8">
             <h2 className="text-[19px] font-extrabold mb-4 pb-3 border-b border-neutral-100 tracking-tight text-neutral-900">Description</h2>
             <p className={`text-[15px] text-neutral-500 leading-[1.8] whitespace-pre-wrap ${!descExpanded ? 'line-clamp-4' : ''}`}>
-              {property.description || 'This beautiful property offers premium living in one of the most sought-after locations in the United States.'}
+              {property.description || 'This distressed or off-market property presents a unique opportunity in one of the most sought-after locations in the United States.'}
             </p>
             <button className="mt-2 bg-transparent border-none text-neutral-900 font-bold text-sm cursor-pointer p-0" style={{ fontFamily: 'Raleway, sans-serif' }} onClick={() => setDescExpanded(!descExpanded)}>
               {descExpanded ? 'Show less' : 'Read more'}

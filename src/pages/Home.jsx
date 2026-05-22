@@ -323,7 +323,7 @@ export default function Home() {
                       FEATURED
                     </div>
                     <h2 className="text-[30px] max-sm:text-2xl font-extrabold text-neutral-900 tracking-tight leading-tight">Featured Properties</h2>
-                    <p className="text-[15px] max-sm:text-[13px] text-neutral-400 mt-1">Hand-picked premium listings for you</p>
+                    <p className="text-[15px] max-sm:text-[13px] text-neutral-400 mt-1">Hand-picked distressed & off-market listings for you</p>
                   </div>
                   <Link to="/properties" className="flex items-center justify-center gap-1 text-[13px] font-bold bg-neutral-100 text-neutral-900 px-4 py-2 rounded-full hover:bg-neutral-200 transition-colors shrink-0 whitespace-nowrap">
                     See all <ChevronRight size={14} />

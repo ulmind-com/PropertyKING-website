@@ -19,7 +19,7 @@ export default function About() {
             Redefining Real Estate in America
           </h1>
           <p className="text-base text-white/55 max-w-[520px] mx-auto leading-relaxed">
-            PropertyKing is the premium property listing platform built for the modern era —
+            PropertyKing is the distressed & off-market property listing platform built for the modern era —
             connecting buyers, sellers, and agents with a seamless, beautiful experience.
           </p>
         </div>

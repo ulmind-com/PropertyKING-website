@@ -129,7 +129,7 @@ function MapPickerModal({ open, onClose, onConfirm, initialCoords }) {
           markerRef.current = m;
           setPicked({ lat, lng });
           // Parse address components from place
-          parseAddressComponents(place.address_components);
+          parseAddressComponents(place.address_components, place.formatted_address);
           m.addListener('dragend', () => {
             const pos = m.getPosition();
             const lt = pos.lat(), ln = pos.lng();
@@ -153,9 +153,9 @@ function MapPickerModal({ open, onClose, onConfirm, initialCoords }) {
     };
   }, [open]);
 
-  const parseAddressComponents = (components) => {
+  const parseAddressComponents = (components, formattedAddress) => {
     if (!components) return;
-    const result = {};
+    const result = { formatted_address: formattedAddress };
     for (const c of components) {
       const t = c.types;
       if (t.includes('street_number')) result.house_number = c.long_name;
@@ -168,14 +168,14 @@ function MapPickerModal({ open, onClose, onConfirm, initialCoords }) {
     }
     setReverseResult(result);
     const addr = [result.house_number, result.road, result.city, result.state_short, result.postcode].filter(Boolean).join(', ');
-    setAddressText(addr);
+    setAddressText(addr || formattedAddress);
   };
 
   const reverseGeocode = (lat, lng) => {
     if (!geocoderRef.current) return;
     geocoderRef.current.geocode({ location: { lat, lng } }, (results, status) => {
       if (status === 'OK' && results?.[0]) {
-        parseAddressComponents(results[0].address_components);
+        parseAddressComponents(results[0].address_components, results[0].formatted_address);
       }
     });
   };
@@ -352,7 +352,7 @@ export default function AddProperty() {
                 if (t.includes('administrative_area_level_2')) result.county = c.long_name;
               }
               
-              const road = result.house_number || result.road ? `${result.house_number || ''} ${result.road || ''}`.trim() : '';
+              const road = result.house_number || result.road ? `${result.house_number || ''} ${result.road || ''}`.trim() : (results[0].formatted_address ? results[0].formatted_address.split(',')[0] : '');
               if (road) setAddress(road);
               if (result.city) setCity(result.city);
               if (result.state_short && US_STATES.includes(result.state_short)) setStateSel(result.state_short);
@@ -707,7 +707,7 @@ export default function AddProperty() {
         onConfirm={(coords, addrData) => {
           setGpsCoords({ lat: coords.lat, lng: coords.lng });
           if (addrData) {
-            const road = addrData.house_number || addrData.road ? `${addrData.house_number || ''} ${addrData.road || ''}`.trim() : '';
+            const road = addrData.house_number || addrData.road ? `${addrData.house_number || ''} ${addrData.road || ''}`.trim() : (addrData.formatted_address ? addrData.formatted_address.split(',')[0] : '');
             if (road) setAddress(road);
             if (addrData.city) setCity(addrData.city);
             if (addrData.state_short && US_STATES.includes(addrData.state_short)) setStateSel(addrData.state_short);

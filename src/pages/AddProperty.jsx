@@ -1,11 +1,161 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ChevronLeft, Camera, Video, Map, MapPin, Layers, Plus, X, Check, Loader2, Upload
+  ChevronLeft, Camera, Video, Map, MapPin, Layers, Plus, X, Check, Loader2, Upload, Search, Crosshair
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { propertyAPI, propertyTypeAPI, uploadAPI } from '../api';
 import { useAuth } from '../context/AuthContext';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+/* ─── Map Picker Modal ─── */
+const DARK_TILE = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+
+function MapPickerModal({ open, onClose, onConfirm, initialCoords }) {
+  const mapRef = useRef(null);
+  const mapInstance = useRef(null);
+  const markerRef = useRef(null);
+  const [picked, setPicked] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searching, setSearching] = useState(false);
+  const [reverseResult, setReverseResult] = useState(null);
+
+  useEffect(() => {
+    if (!open || !mapRef.current) return;
+    if (mapInstance.current) { mapInstance.current.invalidateSize(); return; }
+
+    const center = initialCoords ? [initialCoords.lat, initialCoords.lng] : [39.8283, -98.5795];
+    const zoom = initialCoords ? 14 : 4;
+
+    const map = L.map(mapRef.current, { zoomControl: false }).setView(center, zoom);
+    L.tileLayer(DARK_TILE, { attribution: '' }).addTo(map);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    mapInstance.current = map;
+
+    if (initialCoords) {
+      const m = L.marker([initialCoords.lat, initialCoords.lng]).addTo(map);
+      markerRef.current = m;
+      setPicked(initialCoords);
+      reverseGeocode(initialCoords.lat, initialCoords.lng);
+    }
+
+    map.on('click', (e) => {
+      const { lat, lng } = e.latlng;
+      if (markerRef.current) markerRef.current.remove();
+      const m = L.marker([lat, lng]).addTo(map);
+      markerRef.current = m;
+      setPicked({ lat, lng });
+      reverseGeocode(lat, lng);
+    });
+
+    return () => { map.remove(); mapInstance.current = null; markerRef.current = null; };
+  }, [open]);
+
+  const reverseGeocode = async (lat, lng) => {
+    try {
+      const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`);
+      const d = await r.json();
+      if (d?.address) setReverseResult(d.address);
+    } catch (e) { /* silent */ }
+  };
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    setSearching(true);
+    try {
+      const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1&addressdetails=1&countrycodes=us`);
+      const d = await r.json();
+      if (d.length > 0) {
+        const { lat, lon, address } = d[0];
+        const lt = parseFloat(lat), ln = parseFloat(lon);
+        mapInstance.current?.setView([lt, ln], 16);
+        if (markerRef.current) markerRef.current.remove();
+        const m = L.marker([lt, ln]).addTo(mapInstance.current);
+        markerRef.current = m;
+        setPicked({ lat: lt, lng: ln });
+        if (address) setReverseResult(address);
+      } else { toast.error('Location not found'); }
+    } catch (e) { toast.error('Search failed'); }
+    setSearching(false);
+  };
+
+  const handleLocateMe = () => {
+    if (!navigator.geolocation) return toast.error('Geolocation not supported');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        mapInstance.current?.setView([lat, lng], 16);
+        if (markerRef.current) markerRef.current.remove();
+        const m = L.marker([lat, lng]).addTo(mapInstance.current);
+        markerRef.current = m;
+        setPicked({ lat, lng });
+        reverseGeocode(lat, lng);
+      },
+      () => toast.error('Could not get location'),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const handleConfirm = () => {
+    if (!picked) return toast.error('Tap on the map to select a location');
+    onConfirm(picked, reverseResult);
+  };
+
+  if (!open) return null;
+
+  return (
+    <div style={{ position:'fixed', inset:0, zIndex:9999, background:'rgba(0,0,0,0.85)', display:'flex', flexDirection:'column' }}>
+      {/* Top Bar */}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px 20px', background:'#111', borderBottom:'1px solid #222' }}>
+        <button onClick={onClose} style={{ background:'none', border:'none', color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', gap:6, fontFamily:'Raleway,sans-serif', fontSize:14, fontWeight:600 }}>
+          <X size={20} /> Cancel
+        </button>
+        <span style={{ color:'#fff', fontFamily:'Raleway,sans-serif', fontSize:15, fontWeight:700 }}>📍 Pick Location</span>
+        <button onClick={handleConfirm} disabled={!picked}
+          style={{ background: picked ? '#16a34a' : '#333', border:'none', color:'#fff', cursor: picked ? 'pointer' : 'default', padding:'8px 20px', borderRadius:12, fontFamily:'Raleway,sans-serif', fontSize:13, fontWeight:700, opacity: picked ? 1 : 0.5 }}>
+          Confirm
+        </button>
+      </div>
+
+      {/* Search Bar */}
+      <div style={{ display:'flex', gap:8, padding:'12px 20px', background:'#111' }}>
+        <div style={{ flex:1, display:'flex', alignItems:'center', gap:8, background:'#1a1a1a', border:'1px solid #333', borderRadius:12, padding:'0 14px', height:44 }}>
+          <Search size={16} color="#888" />
+          <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSearch()}
+            placeholder="Search address..."
+            style={{ flex:1, background:'none', border:'none', outline:'none', color:'#fff', fontSize:13, fontFamily:'Raleway,sans-serif' }} />
+        </div>
+        <button onClick={handleSearch} disabled={searching}
+          style={{ background:'#fff', border:'none', borderRadius:12, padding:'0 16px', height:44, cursor:'pointer', fontSize:13, fontWeight:700, fontFamily:'Raleway,sans-serif', color:'#000' }}>
+          {searching ? '...' : 'Search'}
+        </button>
+        <button onClick={handleLocateMe} title="My Location"
+          style={{ background:'#222', border:'1px solid #333', borderRadius:12, width:44, height:44, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', color:'#fff' }}>
+          <Crosshair size={18} />
+        </button>
+      </div>
+
+      {/* Map */}
+      <div ref={mapRef} style={{ flex:1 }} />
+
+      {/* Bottom Info */}
+      {picked && (
+        <div style={{ background:'#111', padding:'14px 20px', borderTop:'1px solid #222' }}>
+          <p style={{ color:'#9ca3af', fontFamily:'Raleway,sans-serif', fontSize:12, fontWeight:600, margin:0 }}>
+            📍 {picked.lat.toFixed(6)}, {picked.lng.toFixed(6)}
+            {reverseResult && (
+              <span style={{ color:'#d1d5db', marginLeft:8 }}>
+                — {reverseResult.road || ''} {reverseResult.city || reverseResult.town || reverseResult.village || ''}, {reverseResult.state || ''} {reverseResult.postcode || ''}
+              </span>
+            )}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const US_STATES = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'];
 const STEPS = ['Basic Info', 'Location', 'Details', 'Media'];
@@ -48,6 +198,7 @@ export default function AddProperty() {
   const [gpsCoords, setGpsCoords] = useState(null);
   const [gpsLoading, setGpsLoading] = useState(false);
   const [showStatePicker, setShowStatePicker] = useState(false);
+  const [showMapPicker, setShowMapPicker] = useState(false);
 
   // Step 3 — Details
   const [bedrooms, setBedrooms] = useState('');
@@ -269,7 +420,7 @@ export default function AddProperty() {
                 {gpsLoading ? <Loader2 size={18} className="animate-spin" /> : <MapPin size={18} />} Auto GPS
               </button>
               <button className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border-[1.5px] border-neutral-200 bg-neutral-50 text-sm font-semibold text-neutral-600 cursor-pointer hover:border-neutral-400 transition-all"
-                style={font} onClick={() => toast('Use GPS or enter address manually')}>
+                style={font} onClick={() => setShowMapPicker(true)}>
                 <Map size={18} /> Pick on Map
               </button>
             </div>
@@ -411,6 +562,29 @@ export default function AddProperty() {
           )}
         </div>
       </div>
+
+      {/* Map Picker Modal */}
+      <MapPickerModal
+        open={showMapPicker}
+        onClose={() => setShowMapPicker(false)}
+        initialCoords={gpsCoords}
+        onConfirm={(coords, addrData) => {
+          setGpsCoords({ lat: coords.lat, lng: coords.lng });
+          if (addrData) {
+            const road = addrData.road || addrData.house_number ? `${addrData.house_number || ''} ${addrData.road || ''}`.trim() : '';
+            if (road) setAddress(road);
+            const c = addrData.city || addrData.town || addrData.village || addrData.hamlet || '';
+            if (c) setCity(c);
+            const st = addrData.state || '';
+            const abbr = US_STATES.find(s => st.toUpperCase().includes(s)) || '';
+            if (abbr) setStateSel(abbr);
+            if (addrData.postcode) setZipCode(addrData.postcode.split('-')[0]);
+            if (addrData.county) setCounty(addrData.county.replace('County', '').trim());
+          }
+          setShowMapPicker(false);
+          toast.success('Location selected from map! 📍');
+        }}
+      />
     </div>
   );
 }

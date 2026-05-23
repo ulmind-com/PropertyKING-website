@@ -330,9 +330,45 @@ export default function AddProperty() {
     setGpsLoading(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setGpsCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        toast.success('Location detected!');
-        setGpsLoading(false);
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setGpsCoords({ lat, lng });
+        
+        // Reverse geocode
+        loadGoogleMaps().then(() => {
+          const geocoder = new window.google.maps.Geocoder();
+          geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+            if (status === 'OK' && results?.[0]) {
+              const components = results[0].address_components;
+              const result = {};
+              for (const c of components) {
+                const t = c.types;
+                if (t.includes('street_number')) result.house_number = c.long_name;
+                if (t.includes('route')) result.road = c.long_name;
+                if (t.includes('locality')) result.city = c.long_name;
+                if (t.includes('sublocality_level_1') && !result.city) result.city = c.long_name;
+                if (t.includes('administrative_area_level_1')) result.state_short = c.short_name;
+                if (t.includes('postal_code')) result.postcode = c.long_name;
+                if (t.includes('administrative_area_level_2')) result.county = c.long_name;
+              }
+              
+              const road = result.house_number || result.road ? `${result.house_number || ''} ${result.road || ''}`.trim() : '';
+              if (road) setAddress(road);
+              if (result.city) setCity(result.city);
+              if (result.state_short && US_STATES.includes(result.state_short)) setStateSel(result.state_short);
+              if (result.postcode) setZipCode(result.postcode.split('-')[0]);
+              if (result.county) setCounty(result.county.replace('County', '').trim());
+              
+              toast.success('Location & address auto-filled! 📍');
+            } else {
+              toast.success('GPS located! (Address not found)');
+            }
+            setGpsLoading(false);
+          });
+        }).catch(() => {
+          toast.success('Location detected! (Could not load address)');
+          setGpsLoading(false);
+        });
       },
       () => { toast.error('Could not get location'); setGpsLoading(false); },
       { enableHighAccuracy: true, timeout: 10000 }

@@ -267,9 +267,33 @@ const Label = ({ children, required }) => (
   </label>
 );
 
-const Input = (props) => (
-  <input {...props} className={`w-full h-[52px] px-4 bg-neutral-50 border border-neutral-200 rounded-xl text-sm font-medium text-neutral-900 outline-none transition-all focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900/10 placeholder:text-neutral-400 ${props.className||''}`} style={font} />
-);
+const Input = React.forwardRef((props, ref) => (
+  <input ref={ref} {...props} className={`w-full h-[52px] px-4 bg-neutral-50 border border-neutral-200 rounded-xl text-sm font-medium text-neutral-900 outline-none transition-all focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900/10 placeholder:text-neutral-400 ${props.className||''}`} style={font} />
+));
+
+const AddressAutocomplete = ({ value, onChange, onPlaceSelect }) => {
+  const inputRef = useRef(null);
+  
+  useEffect(() => {
+    let autocomplete;
+    loadGoogleMaps().then(() => {
+      if (!inputRef.current) return;
+      autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, { types: ['address'] });
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (place && place.geometry) {
+          onPlaceSelect(place);
+        }
+      });
+    }).catch(()=>{});
+    
+    return () => {
+      if (autocomplete) window.google.maps.event.clearInstanceListeners(autocomplete);
+    };
+  }, [onPlaceSelect]);
+
+  return <Input ref={inputRef} placeholder="123 Main Street" value={value} onChange={onChange} />;
+};
 
 export default function AddProperty() {
   const navigate = useNavigate();
@@ -572,7 +596,36 @@ export default function AddProperty() {
               </div>
             ) : (
               <div className="space-y-5 animate-fade-in">
-                <div className="space-y-1.5"><Label required>Street Address</Label><Input placeholder="123 Main Street" value={address} onChange={e => setAddress(e.target.value)} /></div>
+                <div className="space-y-1.5">
+                  <Label required>Street Address</Label>
+                  <AddressAutocomplete 
+                    value={address} 
+                    onChange={e => setAddress(e.target.value)} 
+                    onPlaceSelect={(place) => {
+                      setGpsCoords({ lat: place.geometry.location.lat(), lng: place.geometry.location.lng() });
+                      const components = place.address_components;
+                      if (!components) return;
+                      const result = {};
+                      for (const c of components) {
+                        const t = c.types;
+                        if (t.includes('street_number')) result.house_number = c.long_name;
+                        if (t.includes('route')) result.road = c.long_name;
+                        if (t.includes('locality')) result.city = c.long_name;
+                        if (t.includes('sublocality_level_1') && !result.city) result.city = c.long_name;
+                        if (t.includes('administrative_area_level_1')) result.state_short = c.short_name;
+                        if (t.includes('postal_code')) result.postcode = c.long_name;
+                        if (t.includes('administrative_area_level_2')) result.county = c.long_name;
+                      }
+                      const road = result.house_number || result.road ? `${result.house_number || ''} ${result.road || ''}`.trim() : (place.formatted_address ? place.formatted_address.split(',')[0] : '');
+                      if (road) setAddress(road);
+                      if (result.city) setCity(result.city);
+                      if (result.state_short && US_STATES.includes(result.state_short)) setStateSel(result.state_short);
+                      if (result.postcode) setZipCode(result.postcode.split('-')[0]);
+                      if (result.county) setCounty(result.county.replace('County', '').trim());
+                      toast.success('Address auto-filled! 📍');
+                    }}
+                  />
+                </div>
                 <div className="space-y-1.5"><Label required>City</Label><Input placeholder="New York" value={city} onChange={e => setCity(e.target.value)} /></div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5"><Label required>State</Label>

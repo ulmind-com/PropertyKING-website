@@ -6,91 +6,198 @@ import {
 import toast from 'react-hot-toast';
 import { propertyAPI, propertyTypeAPI, uploadAPI } from '../api';
 import { useAuth } from '../context/AuthContext';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+
+/* ─── Load Google Maps Script ─── */
+const GMAP_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY;
+let gmapLoaded = false;
+let gmapLoadPromise = null;
+
+function loadGoogleMaps() {
+  if (gmapLoaded && window.google?.maps) return Promise.resolve();
+  if (gmapLoadPromise) return gmapLoadPromise;
+  gmapLoadPromise = new Promise((resolve, reject) => {
+    if (window.google?.maps) { gmapLoaded = true; resolve(); return; }
+    const s = document.createElement('script');
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${GMAP_KEY}&libraries=places,geocoding`;
+    s.async = true;
+    s.defer = true;
+    s.onload = () => { gmapLoaded = true; resolve(); };
+    s.onerror = () => reject(new Error('Failed to load Google Maps'));
+    document.head.appendChild(s);
+  });
+  return gmapLoadPromise;
+}
+
+/* ─── Dark Map Style ─── */
+const DARK_STYLE = [
+  { elementType: 'geometry', stylers: [{ color: '#212121' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#757575' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#212121' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2c2c2c' }] },
+  { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#212121' }] },
+  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#3c3c3c' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#000000' }] },
+  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#3d3d3d' }] },
+  { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+];
 
 /* ─── Map Picker Modal ─── */
-const DARK_TILE = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-
 function MapPickerModal({ open, onClose, onConfirm, initialCoords }) {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const markerRef = useRef(null);
+  const geocoderRef = useRef(null);
+  const searchInputRef = useRef(null);
   const [picked, setPicked] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
   const [searching, setSearching] = useState(false);
   const [reverseResult, setReverseResult] = useState(null);
+  const [mapReady, setMapReady] = useState(false);
+  const [addressText, setAddressText] = useState('');
 
   useEffect(() => {
-    if (!open || !mapRef.current) return;
-    if (mapInstance.current) { mapInstance.current.invalidateSize(); return; }
+    if (!open) return;
+    let cancelled = false;
 
-    const center = initialCoords ? [initialCoords.lat, initialCoords.lng] : [39.8283, -98.5795];
-    const zoom = initialCoords ? 14 : 4;
+    loadGoogleMaps().then(() => {
+      if (cancelled || !mapRef.current) return;
 
-    const map = L.map(mapRef.current, { zoomControl: false }).setView(center, zoom);
-    L.tileLayer(DARK_TILE, { attribution: '' }).addTo(map);
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
-    mapInstance.current = map;
+      const center = initialCoords
+        ? { lat: initialCoords.lat, lng: initialCoords.lng }
+        : { lat: 39.8283, lng: -98.5795 };
+      const zoom = initialCoords ? 14 : 4;
 
-    if (initialCoords) {
-      const m = L.marker([initialCoords.lat, initialCoords.lng]).addTo(map);
-      markerRef.current = m;
-      setPicked(initialCoords);
-      reverseGeocode(initialCoords.lat, initialCoords.lng);
-    }
+      const map = new google.maps.Map(mapRef.current, {
+        center, zoom,
+        styles: DARK_STYLE,
+        disableDefaultUI: true,
+        zoomControl: true,
+        zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_BOTTOM },
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+      });
+      mapInstance.current = map;
+      geocoderRef.current = new google.maps.Geocoder();
 
-    map.on('click', (e) => {
-      const { lat, lng } = e.latlng;
-      if (markerRef.current) markerRef.current.remove();
-      const m = L.marker([lat, lng]).addTo(map);
-      markerRef.current = m;
-      setPicked({ lat, lng });
-      reverseGeocode(lat, lng);
-    });
+      // Place initial marker
+      if (initialCoords) {
+        const m = new google.maps.Marker({ position: center, map, draggable: true });
+        markerRef.current = m;
+        setPicked(initialCoords);
+        reverseGeocode(initialCoords.lat, initialCoords.lng);
+        m.addListener('dragend', () => {
+          const pos = m.getPosition();
+          const lat = pos.lat(), lng = pos.lng();
+          setPicked({ lat, lng });
+          reverseGeocode(lat, lng);
+        });
+      }
 
-    return () => { map.remove(); mapInstance.current = null; markerRef.current = null; };
+      // Click to place marker
+      map.addListener('click', (e) => {
+        const lat = e.latLng.lat(), lng = e.latLng.lng();
+        if (markerRef.current) markerRef.current.setMap(null);
+        const m = new google.maps.Marker({ position: { lat, lng }, map, draggable: true });
+        markerRef.current = m;
+        setPicked({ lat, lng });
+        reverseGeocode(lat, lng);
+        m.addListener('dragend', () => {
+          const pos = m.getPosition();
+          const lt = pos.lat(), ln = pos.lng();
+          setPicked({ lat: lt, lng: ln });
+          reverseGeocode(lt, ln);
+        });
+      });
+
+      // Setup Places Autocomplete on the search input
+      if (searchInputRef.current) {
+        const autocomplete = new google.maps.places.Autocomplete(searchInputRef.current, {
+          types: ['address'],
+          componentRestrictions: { country: 'us' },
+        });
+        autocomplete.bindTo('bounds', map);
+        autocomplete.addListener('place_changed', () => {
+          const place = autocomplete.getPlace();
+          if (!place.geometry?.location) return;
+          const lat = place.geometry.location.lat();
+          const lng = place.geometry.location.lng();
+          map.setCenter({ lat, lng });
+          map.setZoom(17);
+          if (markerRef.current) markerRef.current.setMap(null);
+          const m = new google.maps.Marker({ position: { lat, lng }, map, draggable: true });
+          markerRef.current = m;
+          setPicked({ lat, lng });
+          // Parse address components from place
+          parseAddressComponents(place.address_components);
+          m.addListener('dragend', () => {
+            const pos = m.getPosition();
+            const lt = pos.lat(), ln = pos.lng();
+            setPicked({ lat: lt, lng: ln });
+            reverseGeocode(lt, ln);
+          });
+        });
+      }
+
+      setMapReady(true);
+    }).catch(() => toast.error('Failed to load Google Maps'));
+
+    return () => {
+      cancelled = true;
+      if (mapInstance.current) { mapInstance.current = null; }
+      if (markerRef.current) { markerRef.current = null; }
+      setMapReady(false);
+      setPicked(null);
+      setReverseResult(null);
+      setAddressText('');
+    };
   }, [open]);
 
-  const reverseGeocode = async (lat, lng) => {
-    try {
-      const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`);
-      const d = await r.json();
-      if (d?.address) setReverseResult(d.address);
-    } catch (e) { /* silent */ }
+  const parseAddressComponents = (components) => {
+    if (!components) return;
+    const result = {};
+    for (const c of components) {
+      const t = c.types;
+      if (t.includes('street_number')) result.house_number = c.long_name;
+      if (t.includes('route')) result.road = c.long_name;
+      if (t.includes('locality')) result.city = c.long_name;
+      if (t.includes('sublocality_level_1') && !result.city) result.city = c.long_name;
+      if (t.includes('administrative_area_level_1')) { result.state = c.long_name; result.state_short = c.short_name; }
+      if (t.includes('postal_code')) result.postcode = c.long_name;
+      if (t.includes('administrative_area_level_2')) result.county = c.long_name;
+    }
+    setReverseResult(result);
+    const addr = [result.house_number, result.road, result.city, result.state_short, result.postcode].filter(Boolean).join(', ');
+    setAddressText(addr);
   };
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
-    setSearching(true);
-    try {
-      const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1&addressdetails=1&countrycodes=us`);
-      const d = await r.json();
-      if (d.length > 0) {
-        const { lat, lon, address } = d[0];
-        const lt = parseFloat(lat), ln = parseFloat(lon);
-        mapInstance.current?.setView([lt, ln], 16);
-        if (markerRef.current) markerRef.current.remove();
-        const m = L.marker([lt, ln]).addTo(mapInstance.current);
-        markerRef.current = m;
-        setPicked({ lat: lt, lng: ln });
-        if (address) setReverseResult(address);
-      } else { toast.error('Location not found'); }
-    } catch (e) { toast.error('Search failed'); }
-    setSearching(false);
+  const reverseGeocode = (lat, lng) => {
+    if (!geocoderRef.current) return;
+    geocoderRef.current.geocode({ location: { lat, lng } }, (results, status) => {
+      if (status === 'OK' && results?.[0]) {
+        parseAddressComponents(results[0].address_components);
+      }
+    });
   };
 
   const handleLocateMe = () => {
     if (!navigator.geolocation) return toast.error('Geolocation not supported');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const { latitude: lat, longitude: lng } = pos.coords;
-        mapInstance.current?.setView([lat, lng], 16);
-        if (markerRef.current) markerRef.current.remove();
-        const m = L.marker([lat, lng]).addTo(mapInstance.current);
+        const lat = pos.coords.latitude, lng = pos.coords.longitude;
+        mapInstance.current?.setCenter({ lat, lng });
+        mapInstance.current?.setZoom(16);
+        if (markerRef.current) markerRef.current.setMap(null);
+        const m = new google.maps.Marker({ position: { lat, lng }, map: mapInstance.current, draggable: true });
         markerRef.current = m;
         setPicked({ lat, lng });
         reverseGeocode(lat, lng);
+        m.addListener('dragend', () => {
+          const pos2 = m.getPosition();
+          const lt = pos2.lat(), ln = pos2.lng();
+          setPicked({ lat: lt, lng: ln });
+          reverseGeocode(lt, ln);
+        });
       },
       () => toast.error('Could not get location'),
       { enableHighAccuracy: true, timeout: 10000 }
@@ -122,15 +229,10 @@ function MapPickerModal({ open, onClose, onConfirm, initialCoords }) {
       <div style={{ display:'flex', gap:8, padding:'12px 20px', background:'#111' }}>
         <div style={{ flex:1, display:'flex', alignItems:'center', gap:8, background:'#1a1a1a', border:'1px solid #333', borderRadius:12, padding:'0 14px', height:44 }}>
           <Search size={16} color="#888" />
-          <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleSearch()}
+          <input ref={searchInputRef}
             placeholder="Search address..."
             style={{ flex:1, background:'none', border:'none', outline:'none', color:'#fff', fontSize:13, fontFamily:'Raleway,sans-serif' }} />
         </div>
-        <button onClick={handleSearch} disabled={searching}
-          style={{ background:'#fff', border:'none', borderRadius:12, padding:'0 16px', height:44, cursor:'pointer', fontSize:13, fontWeight:700, fontFamily:'Raleway,sans-serif', color:'#000' }}>
-          {searching ? '...' : 'Search'}
-        </button>
         <button onClick={handleLocateMe} title="My Location"
           style={{ background:'#222', border:'1px solid #333', borderRadius:12, width:44, height:44, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', color:'#fff' }}>
           <Crosshair size={18} />
@@ -145,10 +247,8 @@ function MapPickerModal({ open, onClose, onConfirm, initialCoords }) {
         <div style={{ background:'#111', padding:'14px 20px', borderTop:'1px solid #222' }}>
           <p style={{ color:'#9ca3af', fontFamily:'Raleway,sans-serif', fontSize:12, fontWeight:600, margin:0 }}>
             📍 {picked.lat.toFixed(6)}, {picked.lng.toFixed(6)}
-            {reverseResult && (
-              <span style={{ color:'#d1d5db', marginLeft:8 }}>
-                — {reverseResult.road || ''} {reverseResult.city || reverseResult.town || reverseResult.village || ''}, {reverseResult.state || ''} {reverseResult.postcode || ''}
-              </span>
+            {addressText && (
+              <span style={{ color:'#d1d5db', marginLeft:8 }}>— {addressText}</span>
             )}
           </p>
         </div>
@@ -571,13 +671,10 @@ export default function AddProperty() {
         onConfirm={(coords, addrData) => {
           setGpsCoords({ lat: coords.lat, lng: coords.lng });
           if (addrData) {
-            const road = addrData.road || addrData.house_number ? `${addrData.house_number || ''} ${addrData.road || ''}`.trim() : '';
+            const road = addrData.house_number || addrData.road ? `${addrData.house_number || ''} ${addrData.road || ''}`.trim() : '';
             if (road) setAddress(road);
-            const c = addrData.city || addrData.town || addrData.village || addrData.hamlet || '';
-            if (c) setCity(c);
-            const st = addrData.state || '';
-            const abbr = US_STATES.find(s => st.toUpperCase().includes(s)) || '';
-            if (abbr) setStateSel(abbr);
+            if (addrData.city) setCity(addrData.city);
+            if (addrData.state_short && US_STATES.includes(addrData.state_short)) setStateSel(addrData.state_short);
             if (addrData.postcode) setZipCode(addrData.postcode.split('-')[0]);
             if (addrData.county) setCounty(addrData.county.replace('County', '').trim());
           }

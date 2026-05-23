@@ -273,6 +273,11 @@ const Input = forwardRef((props, ref) => (
 
 const AddressAutocomplete = ({ value, onChange, onPlaceSelect }) => {
   const inputRef = useRef(null);
+  const onPlaceSelectRef = useRef(onPlaceSelect);
+
+  useEffect(() => {
+    onPlaceSelectRef.current = onPlaceSelect;
+  }, [onPlaceSelect]);
   
   useEffect(() => {
     let autocomplete;
@@ -282,7 +287,7 @@ const AddressAutocomplete = ({ value, onChange, onPlaceSelect }) => {
       autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
         if (place && place.geometry) {
-          onPlaceSelect(place);
+          onPlaceSelectRef.current(place);
         }
       });
     }).catch(()=>{});
@@ -290,7 +295,7 @@ const AddressAutocomplete = ({ value, onChange, onPlaceSelect }) => {
     return () => {
       if (autocomplete) window.google.maps.event.clearInstanceListeners(autocomplete);
     };
-  }, [onPlaceSelect]);
+  }, []);
 
   return <Input ref={inputRef} placeholder="123 Main Street" value={value} onChange={onChange} />;
 };

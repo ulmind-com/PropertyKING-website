@@ -299,6 +299,7 @@ export default function AddProperty() {
   const [gpsLoading, setGpsLoading] = useState(false);
   const [showStatePicker, setShowStatePicker] = useState(false);
   const [showMapPicker, setShowMapPicker] = useState(false);
+  const [showManualAddress, setShowManualAddress] = useState(false);
 
   // Step 3 — Details
   const [bedrooms, setBedrooms] = useState('');
@@ -561,29 +562,41 @@ export default function AddProperty() {
               </button>
             </div>
             {gpsCoords && <p className="text-xs font-semibold text-green-600 text-center" style={font}>📍 {gpsCoords.lat.toFixed(5)}, {gpsCoords.lng.toFixed(5)}</p>}
-            <div className="space-y-1.5"><Label required>Street Address</Label><Input placeholder="123 Main Street" value={address} onChange={e => setAddress(e.target.value)} /></div>
-            <div className="space-y-1.5"><Label required>City</Label><Input placeholder="New York" value={city} onChange={e => setCity(e.target.value)} /></div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5"><Label required>State</Label>
-                <div className="relative">
-                  <button className="w-full h-[52px] px-4 bg-neutral-50 border border-neutral-200 rounded-xl flex items-center justify-between cursor-pointer"
-                    onClick={() => setShowStatePicker(!showStatePicker)}>
-                    <span className={`text-sm font-medium ${stateSel ? 'text-neutral-900' : 'text-neutral-400'}`} style={font}>{stateSel || 'Select'}</span>
-                    <ChevronLeft size={16} className="-rotate-90 text-neutral-400" />
-                  </button>
-                  {showStatePicker && (
-                    <div className="absolute top-14 left-0 right-0 z-50 bg-white border border-neutral-200 rounded-2xl shadow-xl max-h-48 overflow-y-auto">
-                      {US_STATES.map(st => (
-                        <button key={st} className={`w-full px-4 py-3 text-left text-sm font-medium border-b border-neutral-100 cursor-pointer hover:bg-neutral-50 ${stateSel === st ? 'bg-neutral-900/5 font-bold text-neutral-900' : 'text-neutral-600'}`}
-                          style={font} onClick={() => { setStateSel(st); setShowStatePicker(false); }}>{st}</button>
-                      ))}
-                    </div>
-                  )}
-                </div>
+            
+            {(!gpsCoords && !showManualAddress) ? (
+              <div className="text-center pt-2">
+                <p className="text-sm text-neutral-500 mb-3" style={font}>Use GPS or Map to auto-fill your property address.</p>
+                <button className="text-[13px] font-bold text-neutral-900 underline bg-transparent border-none cursor-pointer" style={font} onClick={() => setShowManualAddress(true)}>
+                  Or enter address manually
+                </button>
               </div>
-              <div className="space-y-1.5"><Label required>ZIP Code</Label><Input placeholder="10001" value={zipCode} onChange={e => setZipCode(e.target.value)} maxLength={10} /></div>
-            </div>
-            <div className="space-y-1.5"><Label>County</Label><Input placeholder="e.g. Kings County" value={county} onChange={e => setCounty(e.target.value)} /></div>
+            ) : (
+              <div className="space-y-5 animate-fade-in">
+                <div className="space-y-1.5"><Label required>Street Address</Label><Input placeholder="123 Main Street" value={address} onChange={e => setAddress(e.target.value)} /></div>
+                <div className="space-y-1.5"><Label required>City</Label><Input placeholder="New York" value={city} onChange={e => setCity(e.target.value)} /></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5"><Label required>State</Label>
+                    <div className="relative">
+                      <button className="w-full h-[52px] px-4 bg-neutral-50 border border-neutral-200 rounded-xl flex items-center justify-between cursor-pointer"
+                        onClick={() => setShowStatePicker(!showStatePicker)}>
+                        <span className={`text-sm font-medium ${stateSel ? 'text-neutral-900' : 'text-neutral-400'}`} style={font}>{stateSel || 'Select'}</span>
+                        <ChevronLeft size={16} className="-rotate-90 text-neutral-400" />
+                      </button>
+                      {showStatePicker && (
+                        <div className="absolute top-14 left-0 right-0 z-50 bg-white border border-neutral-200 rounded-2xl shadow-xl max-h-48 overflow-y-auto">
+                          {US_STATES.map(st => (
+                            <button key={st} className={`w-full px-4 py-3 text-left text-sm font-medium border-b border-neutral-100 cursor-pointer hover:bg-neutral-50 ${stateSel === st ? 'bg-neutral-900/5 font-bold text-neutral-900' : 'text-neutral-600'}`}
+                              style={font} onClick={() => { setStateSel(st); setShowStatePicker(false); }}>{st}</button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="space-y-1.5"><Label required>ZIP Code</Label><Input placeholder="10001" value={zipCode} onChange={e => setZipCode(e.target.value)} maxLength={10} /></div>
+                </div>
+                <div className="space-y-1.5"><Label>County</Label><Input placeholder="e.g. Kings County" value={county} onChange={e => setCounty(e.target.value)} /></div>
+              </div>
+            )}
           </div>
         )}
 

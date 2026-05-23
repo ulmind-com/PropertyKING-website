@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ChevronLeft, Camera, Video, Map, MapPin, Layers, Plus, X, Check, Loader2, Upload, Search, Crosshair
@@ -267,7 +267,7 @@ const Label = ({ children, required }) => (
   </label>
 );
 
-const Input = React.forwardRef((props, ref) => (
+const Input = forwardRef((props, ref) => (
   <input ref={ref} {...props} className={`w-full h-[52px] px-4 bg-neutral-50 border border-neutral-200 rounded-xl text-sm font-medium text-neutral-900 outline-none transition-all focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900/10 placeholder:text-neutral-400 ${props.className||''}`} style={font} />
 ));
 

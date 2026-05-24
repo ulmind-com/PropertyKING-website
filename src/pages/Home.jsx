@@ -178,12 +178,12 @@ export default function Home() {
           {/* Hero Text */}
           <div className="animate-fade-in flex-1 flex flex-col justify-center max-w-[680px]">
             <h1 className="text-[clamp(38px,6vw,68px)] font-black text-white leading-[1.05] tracking-tighter mb-5">
-              Find Your<br />
-              {listingType === 'sale' ? 'Dream Home' : listingType === 'rent' ? 'Perfect Rental' : 'Perfect Property'}
-              <span className="block text-white/35 text-[clamp(28px,4vw,52px)]"> Anywhere in US</span>
+              Uncover Hidden<br />
+              {listingType === 'sale' ? 'Fixer-Uppers' : listingType === 'rent' ? 'Cash-Flow Rentals' : 'Distressed Deals'}
+              <span className="block text-white/35 text-[clamp(28px,4vw,52px)]"> Below Market Value</span>
             </h1>
             <p className="text-white/45 text-[15px] max-w-[440px] leading-relaxed mb-10 max-md:mb-7">
-              {listingType === 'sale' ? 'Discover properties for sale across all 50 states. Your dream home is just a search away.' : listingType === 'rent' ? 'Find the perfect rental property. Apartments, houses, and more — across all 50 states.' : 'Browse verified listings across all 50 states. Buy or rent your dream property with confidence.'}
+              {listingType === 'sale' ? 'Find foreclosures, short sales, and off-market properties for pennies on the dollar. Your next big flip starts here.' : listingType === 'rent' ? 'Discover undervalued properties with massive rental yield potential. Perfect for serious investors.' : 'Exclusive access to distressed and underpriced real estate. Maximize your ROI with unbeatable wholesale deals.'}
             </p>
           </div>
 

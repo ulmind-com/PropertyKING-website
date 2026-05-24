@@ -182,7 +182,7 @@ export default function Home() {
               {listingType === 'sale' ? 'Fixer-Uppers' : listingType === 'rent' ? 'Cash-Flow Rentals' : 'Distressed Deals'}
               <span className="block text-white/35 text-[clamp(28px,4vw,52px)] mt-1">Before Anyone Else</span>
             </h1>
-            <p className="text-white/45 text-[15px] max-w-[440px] leading-relaxed mb-10 max-md:mb-7">
+            <p className="text-white/80 text-[15px] max-w-[440px] leading-relaxed mb-10 max-md:mb-7">
               {listingType === 'sale' ? 'Find foreclosures, short sales, and off-market properties for pennies on the dollar. Your next big flip starts here.' : listingType === 'rent' ? 'Discover undervalued properties with massive rental yield potential. Perfect for serious investors.' : 'Exclusive access to distressed and underpriced real estate. Maximize your ROI with unbeatable wholesale deals.'}
             </p>
           </div>

@@ -7,11 +7,17 @@ import { propertyAPI } from '../api';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-const getCoords = (location) => {
-  const c = location?.coordinates;
-  if (!c) return null;
-  if (c.coordinates && Array.isArray(c.coordinates)) return { lat: c.coordinates[1], lng: c.coordinates[0] };
-  if (Array.isArray(c)) return { lat: c[1], lng: c[0] };
+const getCoords = (p) => {
+  // Try nested location.coordinates (GeoJSON format)
+  const loc = p?.location || p;
+  const c = loc?.coordinates;
+  if (c) {
+    if (c.coordinates && Array.isArray(c.coordinates) && c.coordinates[0] !== 0) return { lat: c.coordinates[1], lng: c.coordinates[0] };
+    if (Array.isArray(c) && c[0] !== 0) return { lat: c[1], lng: c[0] };
+  }
+  // Try flat latitude/longitude
+  if (p?.latitude && p?.longitude) return { lat: p.latitude, lng: p.longitude };
+  if (loc?.latitude && loc?.longitude) return { lat: loc.latitude, lng: loc.longitude };
   return null;
 };
 
@@ -114,7 +120,7 @@ export default function MapExplore() {
     // Spread overlapping markers
     const coordMap = {};
     const items = properties.map(p => {
-      const coords = getCoords(p.location);
+      const coords = getCoords(p);
       if (!coords) return null;
       const key = `${coords.lat.toFixed(5)}_${coords.lng.toFixed(5)}`;
       if (!coordMap[key]) coordMap[key] = 0;

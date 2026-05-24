@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, Home, ArrowRight, AlertCircle, ChevronLeft, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { propertyAPI } from '../../api';
 import toast from 'react-hot-toast';
 import './Auth.css';
 
@@ -42,6 +43,17 @@ export default function Login() {
     try {
       await login(email, password);
       toast.success('Welcome back!');
+      
+      try {
+        const res = await propertyAPI.myListings({ limit: 1 });
+        if (res.data.properties && res.data.properties.length > 0) {
+          navigate('/my-listings');
+          return;
+        }
+      } catch (err) {
+        console.error('Failed to check user listings for redirect:', err);
+      }
+
       navigate('/');
     } catch (err) {
       const detail = err.response?.data?.detail;

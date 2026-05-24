@@ -5,25 +5,39 @@ import { AuthProvider } from './context/AuthContext';
 import { CompareProvider } from './context/CompareContext';
 import Navbar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
+import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 
+// Retry wrapper — retries lazy import up to 2 times on chunk load failure
+function lazyRetry(importFn) {
+  return lazy(() =>
+    importFn().catch(() =>
+      new Promise(resolve => setTimeout(resolve, 1500)).then(() =>
+        importFn().catch(() =>
+          new Promise(resolve => setTimeout(resolve, 2000)).then(() => importFn())
+        )
+      )
+    )
+  );
+}
+
 // Lazy-load all pages — loads each chunk only when navigated to
-const Home = lazy(() => import('./pages/Home'));
-const PropertyListing = lazy(() => import('./pages/PropertyListing'));
-const PropertyDetails = lazy(() => import('./pages/PropertyDetails'));
-const Login = lazy(() => import('./pages/Auth/Login'));
-const Register = lazy(() => import('./pages/Auth/Register'));
-const ForgotPassword = lazy(() => import('./pages/Auth/ForgotPassword'));
-const Profile = lazy(() => import('./pages/Profile'));
-const EditProfile = lazy(() => import('./pages/EditProfile'));
-const MyListings = lazy(() => import('./pages/MyListings'));
-const Favorites = lazy(() => import('./pages/Favorites'));
-const Notifications = lazy(() => import('./pages/Notifications'));
-const Inquiries = lazy(() => import('./pages/Inquiries'));
-const About = lazy(() => import('./pages/About'));
-const AddProperty = lazy(() => import('./pages/AddProperty'));
-const MapExplore = lazy(() => import('./pages/MapExplore'));
-const CompareProperties = lazy(() => import('./pages/CompareProperties'));
+const Home = lazyRetry(() => import('./pages/Home'));
+const PropertyListing = lazyRetry(() => import('./pages/PropertyListing'));
+const PropertyDetails = lazyRetry(() => import('./pages/PropertyDetails'));
+const Login = lazyRetry(() => import('./pages/Auth/Login'));
+const Register = lazyRetry(() => import('./pages/Auth/Register'));
+const ForgotPassword = lazyRetry(() => import('./pages/Auth/ForgotPassword'));
+const Profile = lazyRetry(() => import('./pages/Profile'));
+const EditProfile = lazyRetry(() => import('./pages/EditProfile'));
+const MyListings = lazyRetry(() => import('./pages/MyListings'));
+const Favorites = lazyRetry(() => import('./pages/Favorites'));
+const Notifications = lazyRetry(() => import('./pages/Notifications'));
+const Inquiries = lazyRetry(() => import('./pages/Inquiries'));
+const About = lazyRetry(() => import('./pages/About'));
+const AddProperty = lazyRetry(() => import('./pages/AddProperty'));
+const MapExplore = lazyRetry(() => import('./pages/MapExplore'));
+const CompareProperties = lazyRetry(() => import('./pages/CompareProperties'));
 
 import CompareFloatingButton from './components/CompareFloatingButton/CompareFloatingButton';
 
@@ -54,33 +68,35 @@ function App() {
         <div className="app">
           <Navbar />
           <main className="main-content">
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/properties" element={<PropertyListing />} />
-                <Route path="/property/:slug" element={<PropertyDetails />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/edit-profile" element={<EditProfile />} />
-                <Route path="/my-listings" element={<MyListings />} />
-                <Route path="/favorites" element={<Favorites />} />
-                <Route path="/notifications" element={<Notifications />} />
-                <Route path="/inquiries" element={<Inquiries />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/list-property" element={<AddProperty />} />
-              <Route path="/map" element={<MapExplore />} />
-                <Route path="/compare" element={<CompareProperties />} />
-                <Route path="*" element={
-                  <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 pt-[100px]">
-                    <h1 className="text-[72px] font-black text-neutral-900">404</h1>
-                    <p className="text-lg text-neutral-400">Page not found</p>
-                    <a href="/" className="btn btn-primary">Go Home</a>
-                  </div>
-                } />
-              </Routes>
-            </Suspense>
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/properties" element={<PropertyListing />} />
+                  <Route path="/property/:slug" element={<PropertyDetails />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/edit-profile" element={<EditProfile />} />
+                  <Route path="/my-listings" element={<MyListings />} />
+                  <Route path="/favorites" element={<Favorites />} />
+                  <Route path="/notifications" element={<Notifications />} />
+                  <Route path="/inquiries" element={<Inquiries />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/list-property" element={<AddProperty />} />
+                <Route path="/map" element={<MapExplore />} />
+                  <Route path="/compare" element={<CompareProperties />} />
+                  <Route path="*" element={
+                    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 pt-[100px]">
+                      <h1 className="text-[72px] font-black text-neutral-900">404</h1>
+                      <p className="text-lg text-neutral-400">Page not found</p>
+                      <a href="/" className="btn btn-primary">Go Home</a>
+                    </div>
+                  } />
+                </Routes>
+              </Suspense>
+            </ErrorBoundary>
           </main>
           <Footer />
           <CompareFloatingButton />

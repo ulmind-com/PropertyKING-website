@@ -117,7 +117,7 @@ export default function Navbar() {
                 ${isTransparent ? 'text-white hover:bg-white/10' : 'text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900'}
               `} title="Notifications">
                 <Bell size={20} />
-                {hasUnread && (
+                {hasUnread && location.pathname !== '/notifications' && (
                   <span className={`absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-[1.5px] ${isTransparent ? 'border-transparent' : 'border-white'}`} />
                 )}
               </Link>

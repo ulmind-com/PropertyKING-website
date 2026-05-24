@@ -20,8 +20,14 @@ export default function Notifications() {
   const loadNotifications = async () => {
     try {
       const res = await notificationAPI.list({ page: 1, limit: 50 });
-      setNotifications(res.data.notifications || []);
+      const fetchedNotifs = res.data.notifications || [];
+      setNotifications(fetchedNotifs);
       setUnreadCount(res.data.unread_count || 0);
+
+      // Auto mark as read in background so the global red dot goes away
+      if (fetchedNotifs.some(n => !n.is_read)) {
+         notificationAPI.markAllRead().catch(() => {});
+      }
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };

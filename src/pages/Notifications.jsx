@@ -32,6 +32,7 @@ export default function Notifications() {
       await notificationAPI.markAllRead();
       setNotifications(notifications.map(n => ({ ...n, is_read: true })));
       setUnreadCount(0);
+      window.dispatchEvent(new Event('notificationsRead'));
     } catch (e) { console.error(e); }
   };
 
@@ -40,6 +41,11 @@ export default function Notifications() {
     if (window.confirm('Are you sure you want to delete this notification?')) {
       try {
         await notificationAPI.delete(id);
+        const deletedNotif = notifications.find(n => n.id === id);
+        if (deletedNotif && !deletedNotif.is_read) {
+          window.dispatchEvent(new Event('notificationReadSingle'));
+          setUnreadCount(prev => Math.max(0, prev - 1));
+        }
         setNotifications(prev => prev.filter(n => n.id !== id));
         toast.success('Notification removed.');
       } catch (err) {
@@ -54,6 +60,7 @@ export default function Notifications() {
         await notificationAPI.deleteAll();
         setNotifications([]);
         setUnreadCount(0);
+        window.dispatchEvent(new Event('notificationsRead'));
         toast.success('All notifications removed.');
       } catch (err) {
         toast.error('Could not clear notifications.');
@@ -67,6 +74,7 @@ export default function Notifications() {
         await notificationAPI.markRead(item.id);
         setNotifications(notifications.map(n => n.id === item.id ? { ...n, is_read: true } : n));
         setUnreadCount(prev => Math.max(0, prev - 1));
+        window.dispatchEvent(new Event('notificationReadSingle'));
       } catch (e) {}
     }
     const propId = item.data?.property_id || item.data?.property_slug;

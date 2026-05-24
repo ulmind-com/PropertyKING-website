@@ -38,6 +38,20 @@ export default function Navbar() {
     }
   }, [isAuthenticated, location.pathname]);
 
+  // Sync with Notifications page actions
+  useEffect(() => {
+    const handleAllRead = () => setUnreadCount(0);
+    const handleSingleRead = () => setUnreadCount(prev => Math.max(0, prev - 1));
+    
+    window.addEventListener('notificationsRead', handleAllRead);
+    window.addEventListener('notificationReadSingle', handleSingleRead);
+    
+    return () => {
+      window.removeEventListener('notificationsRead', handleAllRead);
+      window.removeEventListener('notificationReadSingle', handleSingleRead);
+    };
+  }, []);
+
   const isHome = location.pathname === '/';
   const isTransparent = isHome && !scrolled;
 

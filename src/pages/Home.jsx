@@ -179,7 +179,7 @@ export default function Home() {
           <div className="animate-fade-in flex-1 flex flex-col justify-center max-w-[680px]">
             <h1 className="text-[clamp(38px,6vw,68px)] font-black text-white leading-[1.05] tracking-tighter mb-5">
               <span className="block text-[clamp(28px,4vw,52px)]">Uncover Hidden</span>
-              {listingType === 'sale' ? 'Fixer-Uppers' : listingType === 'rent' ? 'Cash-Flow Rentals' : 'Distressed Deals'}
+              {listingType === 'sale' ? 'Fixer-Uppers' : listingType === 'rent' ? 'Cash-Flow Rentals' : 'Distressed Properties'}
               <span className="block text-white/35 text-[clamp(28px,4vw,52px)] mt-1">Before Anyone Else</span>
             </h1>
             <p className="text-white/80 text-[15px] max-w-[440px] leading-relaxed mb-10 max-md:mb-7">

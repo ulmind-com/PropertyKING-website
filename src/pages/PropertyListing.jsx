@@ -61,7 +61,11 @@ export default function PropertyListing() {
   const [selectedAmenities, setSelectedAmenities] = useState({});
 
   useEffect(() => { loadPropertyTypes(); loadAmenities(); }, []);
-  useEffect(() => { loadProperties(); }, [filters.page, filters.sort_by, filters.sort_order]);
+
+  // Trigger-based loading: increment this to force a reload with latest filters
+  const [loadTrigger, setLoadTrigger] = useState(0);
+
+  useEffect(() => { loadProperties(); }, [loadTrigger, filters.page, filters.sort_by, filters.sort_order]);
 
   const loadPropertyTypes = async () => {
     try { const r = await propertyTypeAPI.list(); setPropertyTypes(r.data || []); } catch(e) {}
@@ -90,13 +94,14 @@ export default function PropertyListing() {
   const applyFilters = () => {
     setFilters(prev => ({ ...prev, page: 1 }));
     setShowFilters(false);
-    setTimeout(loadProperties, 50);
+    // Use setTimeout to ensure state is committed, then bump trigger
+    setTimeout(() => setLoadTrigger(t => t + 1), 0);
   };
 
   const clearFilters = () => {
     setFilters({ search: '', listing_type: '', property_type_id: '', min_price: '', max_price: '', bedrooms_min: '', bathrooms_min: '', min_sqft: '', max_sqft: '', city: '', state: '', sort_by: 'created_at', sort_order: 'desc', page: 1 });
     setSelectedAmenities({});
-    setTimeout(loadProperties, 100);
+    setTimeout(() => setLoadTrigger(t => t + 1), 0);
   };
 
   const filterCount = [
@@ -134,7 +139,7 @@ export default function PropertyListing() {
             <div className="flex gap-1">
               {['', 'sale', 'rent', 'lease'].map(t => (
                 <button key={t} className={`chip ${filters.listing_type === t ? 'active' : ''}`}
-                  onClick={() => { f('listing_type', t); f('page', 1); setTimeout(loadProperties, 100); }}>
+                  onClick={() => { f('listing_type', t); f('page', 1); setTimeout(() => setLoadTrigger(tr => tr + 1), 0); }}>
                   {t === '' ? 'All' : t === 'sale' ? 'Buy' : t === 'rent' ? 'Rent' : 'Lease'}
                 </button>
               ))}

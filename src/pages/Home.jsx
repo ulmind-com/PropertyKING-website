@@ -8,8 +8,10 @@ import {
 } from 'lucide-react';
 import PropertyCard, { PropertyCardSkeleton } from '../components/PropertyCard/PropertyCard';
 import { propertyAPI, propertyTypeAPI, amenityAPI } from '../api';
-import Lottie from 'lottie-react';
+import LottieModule from 'lottie-react';
 import locationAnimation from '../../lotties/location.json';
+
+const Lottie = LottieModule.default || LottieModule;
 
 const TYPE_ICON_MAP = {
   'house':      <HomeIcon size={22} />,

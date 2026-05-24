@@ -11,7 +11,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [hasUnread, setHasUnread] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -29,7 +29,7 @@ export default function Navbar() {
       const checkUnread = async () => {
         try {
           const res = await notificationAPI.list({ is_read: false, limit: 1 });
-          setHasUnread(res.data?.total > 0 || res.data?.notifications?.length > 0);
+          setUnreadCount(res.data?.unread_count || res.data?.total || 0);
         } catch (e) {}
       };
       checkUnread();
@@ -117,8 +117,10 @@ export default function Navbar() {
                 ${isTransparent ? 'text-white hover:bg-white/10' : 'text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900'}
               `} title="Notifications">
                 <Bell size={20} />
-                {hasUnread && location.pathname !== '/notifications' && (
-                  <span className={`absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-[1.5px] ${isTransparent ? 'border-transparent' : 'border-white'}`} />
+                {unreadCount > 0 && (
+                  <span className={`absolute top-1.5 right-1.5 min-w-[16px] h-[16px] px-1 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full border-[1.5px] ${isTransparent ? 'border-transparent' : 'border-white'}`}>
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
                 )}
               </Link>
               <Link to="/list-property" className="btn btn-primary btn-sm max-md:hidden">

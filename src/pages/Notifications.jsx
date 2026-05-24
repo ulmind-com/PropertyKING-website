@@ -23,11 +23,6 @@ export default function Notifications() {
       const fetchedNotifs = res.data.notifications || [];
       setNotifications(fetchedNotifs);
       setUnreadCount(res.data.unread_count || 0);
-
-      // Auto mark as read in background so the global red dot goes away
-      if (fetchedNotifs.some(n => !n.is_read)) {
-         notificationAPI.markAllRead().catch(() => {});
-      }
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };

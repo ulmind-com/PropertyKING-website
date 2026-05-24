@@ -43,16 +43,23 @@ export default function MyListings() {
     }
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const confirmDelete = async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget || isDeleting) return;
+    setIsDeleting(true);
+    const targetId = deleteTarget;
     try {
-      await propertyAPI.delete(deleteTarget);
-      setListings(prev => prev.filter(p => p.id !== deleteTarget));
+      await propertyAPI.delete(targetId);
+      setListings(prev => prev.filter(p => p.id !== targetId));
       toast.success('Property listing removed.');
+      setDeleteTarget(null);
     } catch (err) {
       toast.error('Could not delete property.');
+      // Only clear if we actually failed, maybe user wants to try again
+      setDeleteTarget(null); 
     } finally {
-      setDeleteTarget(null);
+      setIsDeleting(false);
     }
   };
 
@@ -202,10 +209,11 @@ export default function MyListings() {
                 Cancel
               </button>
               <button 
-                className="flex-1 py-3.5 rounded-xl bg-red-500 text-white font-bold text-[15px] hover:bg-red-600 transition-colors border-none cursor-pointer shadow-sm shadow-red-500/20"
+                className={`flex-1 py-3.5 rounded-xl text-white font-bold text-[15px] transition-colors border-none shadow-sm shadow-red-500/20 ${isDeleting ? 'bg-red-400 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600 cursor-pointer'}`}
                 onClick={confirmDelete}
+                disabled={isDeleting}
               >
-                Delete
+                {isDeleting ? 'Deleting...' : 'Delete'}
               </button>
             </div>
           </div>

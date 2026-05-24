@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import PropertyCard, { PropertyCardSkeleton } from '../components/PropertyCard/PropertyCard';
 import { propertyAPI, propertyTypeAPI, amenityAPI } from '../api';
+import Lottie from 'lottie-react';
+import locationAnimation from '../../lotties/location.json';
 
 const TYPE_ICON_MAP = {
   'house':      <HomeIcon size={22} />,
@@ -158,19 +160,13 @@ export default function Home() {
         <div className="relative z-[2] container-custom pt-[120px] pb-[60px] flex flex-col min-h-screen">
           {/* Top Row — like app: avatar + location + bell */}
           <div className="animate-fade-in flex items-center gap-3 mb-10 max-md:mb-6">
-            <div className="w-10 h-10 rounded-full bg-white/[0.12] border border-white/[0.15] flex items-center justify-center text-white overflow-hidden">
-              <img src="https://ui-avatars.com/api/?name=User&background=random&color=fff" alt="" className="w-full h-full object-cover" />
+            <div className="w-12 h-12 flex items-center justify-center">
+              <Lottie animationData={locationAnimation} loop={true} className="w-full h-full" />
             </div>
             <div className="flex-1">
               <span className="text-[11px] text-white/40 font-medium uppercase tracking-widest block mb-0.5">Location</span>
               <div className="flex items-center gap-1">
-                <MapPin size={14} className="text-white/70" />
                 <span className="text-white font-extrabold text-[15px] tracking-tight">{locationName}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-white/[0.1] flex items-center justify-center">
-                <span className="w-[7px] h-[7px] rounded-full bg-emerald-500 animate-pulse-soft" />
               </div>
             </div>
           </div>

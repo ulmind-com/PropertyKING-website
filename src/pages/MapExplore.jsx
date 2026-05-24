@@ -171,18 +171,59 @@ export default function MapExplore() {
     setLoading(false);
   };
 
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const debounceRef = useRef(null);
+
   const reCenter = () => {
     if (!userCoords || !mapObjRef.current) return;
     mapObjRef.current.flyTo([userCoords.lat, userCoords.lng], 11, { duration: 0.6 });
     loadProperties(userCoords);
   };
 
+  // Fetch autocomplete suggestions (debounced)
+  const fetchSuggestions = (q) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!q || q.length < 2) { setSuggestions([]); setShowSuggestions(false); return; }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=5&addressdetails=1&countrycodes=us`);
+        const data = await resp.json();
+        setSuggestions(data.map(d => ({
+          display: d.display_name,
+          lat: parseFloat(d.lat),
+          lng: parseFloat(d.lon),
+          type: d.type,
+          short: [d.address?.city || d.address?.town || d.address?.village || d.address?.county, d.address?.state].filter(Boolean).join(', ') || d.display_name.split(',').slice(0, 2).join(','),
+        })));
+        setShowSuggestions(true);
+      } catch(e) { setSuggestions([]); }
+    }, 350);
+  };
+
+  const handleSearchInput = (val) => {
+    setSearchText(val);
+    fetchSuggestions(val);
+  };
+
+  const handleSelectSuggestion = async (sug) => {
+    setSearchText(sug.short);
+    setSuggestions([]);
+    setShowSuggestions(false);
+    setSearching(true);
+    const c = { lat: sug.lat, lng: sug.lng };
+    mapObjRef.current.flyTo([c.lat, c.lng], 12, { duration: 0.8 });
+    await loadProperties(c, 50);
+    setSearching(false);
+  };
+
   const handleSearch = async () => {
     const q = searchText.trim();
     if (!q) return;
+    setShowSuggestions(false);
+    setSuggestions([]);
     setSearching(true);
     try {
-      // Use free Nominatim geocoder
       const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`);
       const data = await resp.json();
       if (data.length > 0) {
@@ -209,21 +250,41 @@ export default function MapExplore() {
         </div>
       )}
 
-      {/* Search Bar Overlay */}
+      {/* Search Bar Overlay with Autocomplete */}
       <div className="absolute top-[90px] left-5 right-5 z-[1001]">
-        <div className="flex items-center gap-2.5 bg-white rounded-2xl px-4 h-[52px] shadow-xl max-w-[500px]">
+        <div className={`flex items-center gap-2.5 bg-white px-4 h-[52px] shadow-xl max-w-[500px] ${showSuggestions && suggestions.length > 0 ? 'rounded-t-2xl' : 'rounded-2xl'}`}>
           {searching ? <Loader2 size={18} className="text-neutral-400 animate-spin shrink-0" /> : <Search size={18} className="text-neutral-400 shrink-0" />}
           <input
-            type="text" placeholder="Search city, e.g. Austin, Miami..."
-            value={searchText} onChange={e => setSearchText(e.target.value)}
+            type="text" placeholder="Search city, address, zip code..."
+            value={searchText} onChange={e => handleSearchInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSearch()}
+            onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
             className="flex-1 border-none bg-transparent text-[15px] font-medium text-neutral-900 outline-none placeholder:text-neutral-400"
             style={font} disabled={searching}
           />
           {searchText && !searching && (
-            <button className="bg-transparent border-none cursor-pointer p-0 text-neutral-400 hover:text-neutral-900" onClick={() => setSearchText('')}><X size={18} /></button>
+            <button className="bg-transparent border-none cursor-pointer p-0 text-neutral-400 hover:text-neutral-900" onClick={() => { setSearchText(''); setSuggestions([]); setShowSuggestions(false); }}><X size={18} /></button>
           )}
         </div>
+
+        {/* Suggestions Dropdown */}
+        {showSuggestions && suggestions.length > 0 && (
+          <div className="bg-white rounded-b-2xl shadow-xl max-w-[500px] border-t border-neutral-100 overflow-hidden">
+            {suggestions.map((sug, i) => (
+              <button key={i} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-neutral-50 transition-colors border-none bg-transparent cursor-pointer text-left"
+                onClick={() => handleSelectSuggestion(sug)}
+              >
+                <div className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center shrink-0">
+                  <MapPin size={14} className="text-neutral-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-semibold text-neutral-800 truncate" style={font}>{sug.short}</p>
+                  <p className="text-[11px] text-neutral-400 truncate" style={font}>{sug.display}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Property Count Pill */}

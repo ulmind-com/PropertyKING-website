@@ -29,7 +29,7 @@ export default function Navbar() {
       const checkUnread = async () => {
         try {
           const res = await notificationAPI.list({ is_read: false, limit: 1 });
-          setUnreadCount(res.data?.unread_count || res.data?.total || 0);
+          setUnreadCount(res.data?.unread_count ?? res.data?.total ?? 0);
         } catch (e) {}
       };
       checkUnread();

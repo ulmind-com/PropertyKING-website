@@ -115,8 +115,8 @@ export default function PropertyListing() {
       <div className="relative pt-28 pb-8 bg-neutral-900 text-center overflow-hidden">
         <div className="absolute -top-[40%] -right-[5%] w-[360px] h-[360px] rounded-full bg-white/[0.04]" />
         <div className="container-custom relative z-[1]">
-          <h1 className="text-[28px] font-extrabold text-white tracking-tight">Find Your Perfect Property</h1>
-          <p className="text-white/50 mt-2 text-sm font-medium">{total} properties available</p>
+          <h1 className="text-[28px] font-extrabold text-white tracking-tight">Explore Distressed & Wholesale Deals</h1>
+          <p className="text-white/50 mt-2 text-sm font-medium">{total} investment opportunities available</p>
         </div>
       </div>
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Heart, Bell, Menu, X, User, LogOut, Home, PlusCircle, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { notificationAPI } from '../../api';
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -10,6 +11,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [hasUnread, setHasUnread] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -21,6 +23,20 @@ export default function Navbar() {
     setMenuOpen(false);
     setProfileOpen(false);
   }, [location]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const checkUnread = async () => {
+        try {
+          const res = await notificationAPI.list({ is_read: false, limit: 1 });
+          setHasUnread(res.data?.total > 0 || res.data?.notifications?.length > 0);
+        } catch (e) {}
+      };
+      checkUnread();
+      const interval = setInterval(checkUnread, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated, location.pathname]);
 
   const isHome = location.pathname === '/';
   const isTransparent = isHome && !scrolled;
@@ -97,10 +113,13 @@ export default function Navbar() {
               `} title="Favorites">
                 <Heart size={20} />
               </Link>
-              <Link to="/notifications" className={`w-10 h-10 flex items-center justify-center rounded-full transition-all max-md:hidden
+              <Link to="/notifications" className={`relative w-10 h-10 flex items-center justify-center rounded-full transition-all max-md:hidden
                 ${isTransparent ? 'text-white hover:bg-white/10' : 'text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900'}
               `} title="Notifications">
                 <Bell size={20} />
+                {hasUnread && (
+                  <span className={`absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-[1.5px] ${isTransparent ? 'border-transparent' : 'border-white'}`} />
+                )}
               </Link>
               <Link to="/list-property" className="btn btn-primary btn-sm max-md:hidden">
                 <PlusCircle size={16} /> List Property

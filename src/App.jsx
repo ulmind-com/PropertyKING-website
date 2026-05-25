@@ -31,6 +31,7 @@ const ForgotPassword = lazyRetry(() => import('./pages/Auth/ForgotPassword'));
 const Profile = lazyRetry(() => import('./pages/Profile'));
 const EditProfile = lazyRetry(() => import('./pages/EditProfile'));
 const MyListings = lazyRetry(() => import('./pages/MyListings'));
+const PropertyLeads = lazyRetry(() => import('./pages/PropertyLeads'));
 const Favorites = lazyRetry(() => import('./pages/Favorites'));
 const Notifications = lazyRetry(() => import('./pages/Notifications'));
 const Inquiries = lazyRetry(() => import('./pages/Inquiries'));
@@ -80,6 +81,7 @@ function App() {
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/edit-profile" element={<EditProfile />} />
                   <Route path="/my-listings" element={<MyListings />} />
+                  <Route path="/my-listings/:id/leads" element={<PropertyLeads />} />
                   <Route path="/favorites" element={<Favorites />} />
                   <Route path="/notifications" element={<Notifications />} />
                   <Route path="/inquiries" element={<Inquiries />} />

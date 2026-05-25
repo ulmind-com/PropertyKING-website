@@ -154,7 +154,7 @@ export default function MyListings() {
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-neutral-100">
                     <button 
                       className="flex items-center gap-1.5 px-3 py-2 bg-transparent border-none cursor-pointer text-blue-600 font-bold text-sm hover:bg-blue-50 rounded-lg transition-colors"
-                      onClick={() => navigate(`/property/${item.slug || item.id}`)}
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(`/my-listings/${item.id}/leads`, { state: { property: item } }); }}
                     >
                       View Leads <ArrowRight size={16} />
                     </button>

@@ -66,6 +66,8 @@ export const propertyAPI = {
   nearby: (params) => api.get('/properties/nearby', { params }),
   recommendations: (params) => api.get('/properties/recommendations', { params }),
   myListings: (params) => api.get('/properties/my-listings', { params }),
+  myListingsStats: () => api.get('/properties/my-listings/stats'),
+  getViewers: (id, params) => api.get(`/properties/${id}/viewers`, { params }),
   topViewed: (params) => api.get('/properties/top-viewed', { params }),
   toggleStatus: (id) => api.put(`/properties/${id}/toggle-status`),
 };

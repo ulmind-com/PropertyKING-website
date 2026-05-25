@@ -79,8 +79,12 @@ export default function Footer() {
       <div className="container-custom flex max-md:flex-col justify-between items-center max-md:text-center gap-3 py-6 border-t border-white/[0.06] text-[13px] text-neutral-600">
         <p>© {new Date().getFullYear()} PropertyKing. All rights reserved.</p>
         <div className="flex gap-6">
-          {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map(t => (
-            <a key={t} href="#" className="text-neutral-600 font-medium transition-colors hover:text-neutral-400">{t}</a>
+          {[
+            { label: 'Privacy Policy', to: '/privacy-policy' },
+            { label: 'Terms of Service', to: '/privacy-policy' },
+            { label: 'Cookie Policy', to: '/privacy-policy' },
+          ].map(({ label, to }) => (
+            <Link key={label} to={to} className="text-neutral-600 font-medium transition-colors hover:text-neutral-400">{label}</Link>
           ))}
         </div>
       </div>

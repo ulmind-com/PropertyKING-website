@@ -39,6 +39,7 @@ const About = lazyRetry(() => import('./pages/About'));
 const AddProperty = lazyRetry(() => import('./pages/AddProperty'));
 const MapExplore = lazyRetry(() => import('./pages/MapExplore'));
 const CompareProperties = lazyRetry(() => import('./pages/CompareProperties'));
+const PrivacyPolicy = lazyRetry(() => import('./pages/PrivacyPolicy'));
 
 import CompareFloatingButton from './components/CompareFloatingButton/CompareFloatingButton';
 
@@ -89,6 +90,7 @@ function App() {
                   <Route path="/list-property" element={<AddProperty />} />
                 <Route path="/map" element={<MapExplore />} />
                   <Route path="/compare" element={<CompareProperties />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="*" element={
                     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 pt-[100px]">
                       <h1 className="text-[72px] font-black text-neutral-900">404</h1>

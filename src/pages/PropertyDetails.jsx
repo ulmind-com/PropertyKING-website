@@ -68,7 +68,7 @@ export default function PropertyDetails() {
     const coords = property.location?.coordinates?.coordinates;
     if (!coords || coords[0] === 0) return;
     const [lng, lat] = coords;
-    const R = 6371;
+    const R = 3958.8;
     const dLat = (lat - userCoords.lat) * Math.PI / 180;
     const dLon = (lng - userCoords.lng) * Math.PI / 180;
     const a = Math.sin(dLat/2)**2 + Math.cos(userCoords.lat*Math.PI/180)*Math.cos(lat*Math.PI/180)*Math.sin(dLon/2)**2;
@@ -81,9 +81,9 @@ export default function PropertyDetails() {
 
   const formatDistance = (d) => {
     if (!d) return '';
-    if (d < 1) return `${Math.round(d * 1000)} m`;
-    if (d < 10) return `${d.toFixed(1)} km`;
-    return `${Math.round(d).toLocaleString()} km`;
+    if (d < 1) return `${Math.round(d * 5280)} ft`;
+    if (d < 10) return `${d.toFixed(1)} mi`;
+    return `${Math.round(d).toLocaleString()} mi`;
   };
 
   const loadProperty = async () => {
@@ -225,7 +225,7 @@ export default function PropertyDetails() {
 
   // Only show route map when user is nearby (< 50km), otherwise just show property area
   const getRouteMapUrl = () => {
-    if (distance && distance < 50 && userCoords) {
+    if (distance && distance < 31 && userCoords) {
       const coords = property.location?.coordinates?.coordinates;
       if (coords && coords[0] !== 0) {
         const bbox = [

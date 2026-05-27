@@ -156,11 +156,16 @@ export default function Home() {
     <div>
       {/* ─── HERO — matches app gradient header ─── */}
       <section className="relative overflow-hidden" style={{
-        backgroundImage: 'linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0.8) 85%, #F5F5F5 100%), url("/prop.png")',
+        backgroundImage: 'url("/prop.png")',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
         minHeight: '100vh'
       }}>
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 z-[1]" style={{
+          background: 'linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.45) 35%, rgba(0,0,0,0.35) 55%, rgba(0,0,0,0.65) 80%, #F5F5F5 100%)'
+        }} />
         <div className="relative z-[2] container-custom pt-[120px] pb-[60px] flex flex-col min-h-screen">
           {/* Top Row — like app: avatar + location + bell */}
           <div className="animate-fade-in flex items-center gap-3 mb-10 max-md:mb-6">

@@ -154,11 +154,16 @@ export default function Home() {
    return (
     <>
     <div>
-      {/* ─── HERO — matches app gradient header ─── */}
-      <section className="relative overflow-hidden" style={{
-        background: 'linear-gradient(180deg, #000000 0%, #1C1C1E 40%, #3A3A3C 75%, #F5F5F5 100%)',
-        minHeight: '100vh'
-      }}>
+      {/* ─── HERO — full-screen background image ─── */}
+      <section className="relative overflow-hidden" style={{ minHeight: '100vh' }}>
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img src="/prop.png" alt="" className="w-full h-full object-cover" />
+        </div>
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0 z-[1]" style={{
+          background: 'linear-gradient(180deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.45) 60%, rgba(0,0,0,0.7) 85%, #F5F5F5 100%)'
+        }} />
         <div className="relative z-[2] container-custom pt-[120px] pb-[60px] flex flex-col min-h-screen">
           {/* Top Row — like app: avatar + location + bell */}
           <div className="animate-fade-in flex items-center gap-3 mb-10 max-md:mb-6">
@@ -166,57 +171,27 @@ export default function Home() {
               <Lottie animationData={locationAnimation} loop={true} className="w-full h-full" />
             </div>
             <div className="flex-1">
-              <span className="text-[11px] text-white/40 font-medium uppercase tracking-widest block mb-0.5">Location</span>
+              <span className="text-[11px] text-white/50 font-medium uppercase tracking-widest block mb-0.5">Location</span>
               <div className="flex items-center gap-1">
                 <span className="text-white font-extrabold text-[15px] tracking-tight">{locationName}</span>
               </div>
             </div>
           </div>
 
-          {/* Hero Content — 2 column: text left, image right */}
-          <div className="animate-fade-in flex-1 flex items-center gap-12 max-lg:flex-col max-lg:gap-8">
-            {/* Left — Text */}
-            <div className="flex-1 flex flex-col justify-center max-w-[680px]">
-              <h1 className="text-[clamp(38px,6vw,68px)] font-black text-white leading-[1.05] tracking-tighter mb-5">
-                <span className="block text-[clamp(28px,4vw,52px)]">Uncover Hidden</span>
-                {listingType === 'sale' ? 'Fixer-Uppers' : listingType === 'rent' ? 'Cash-Flow Rentals' : 'Distressed Properties'}
-                <span className="block text-white/35 text-[clamp(28px,4vw,52px)] mt-1">Before Anyone Else</span>
-              </h1>
-              <p className="text-white/80 text-[15px] max-w-[440px] leading-relaxed mb-10 max-md:mb-7">
-                {listingType === 'sale' ? 'Find foreclosures, short sales, and off-market properties for pennies on the dollar. Your next big flip starts here.' : listingType === 'rent' ? 'Discover undervalued properties with massive rental yield potential. Perfect for serious investors.' : 'Exclusive access to distressed and underpriced real estate. Maximize your ROI with unbeatable wholesale deals.'}
-              </p>
-            </div>
-
-            {/* Right — Featured Image */}
-            <div className="relative max-lg:w-full max-lg:max-w-[480px] max-lg:mx-auto shrink-0">
-              {/* Glow effect behind */}
-              <div className="absolute -inset-6 rounded-[40px] bg-gradient-to-br from-amber-500/20 via-transparent to-white/10 blur-2xl" />
-              {/* Decorative ring */}
-              <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full border-2 border-white/10" />
-              <div className="absolute -bottom-3 -left-3 w-16 h-16 rounded-full border-2 border-amber-500/20" />
-              {/* Image frame */}
-              <div className="relative rounded-3xl overflow-hidden border-2 border-white/10 shadow-[0_32px_64px_rgba(0,0,0,0.5)]" style={{ width: 'min(420px, 38vw)', aspectRatio: '4/3' }}>
-                <img 
-                  src="/prop.png" 
-                  alt="Featured Distressed Property" 
-                  className="w-full h-full object-cover"
-                />
-                {/* Glassmorphism overlay badge */}
-                <div className="absolute bottom-4 left-4 right-4 flex items-center gap-3 px-4 py-3 rounded-2xl" style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
-                    <TrendingUp size={20} className="text-amber-400" />
-                  </div>
-                  <div>
-                    <div className="text-white text-[13px] font-bold leading-tight">High ROI Opportunity</div>
-                    <div className="text-white/50 text-[11px] font-medium mt-0.5">Distressed properties · Below market value</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Hero Text */}
+          <div className="animate-fade-in flex-1 flex flex-col justify-center max-w-[700px]">
+            <h1 className="text-[clamp(38px,6vw,68px)] font-black text-white leading-[1.05] tracking-tighter mb-5" style={{ textShadow: '0 2px 24px rgba(0,0,0,0.4)' }}>
+              <span className="block text-[clamp(28px,4vw,52px)]">Uncover Hidden</span>
+              {listingType === 'sale' ? 'Fixer-Uppers' : listingType === 'rent' ? 'Cash-Flow Rentals' : 'Distressed Properties'}
+              <span className="block text-white/40 text-[clamp(28px,4vw,52px)] mt-1">Before Anyone Else</span>
+            </h1>
+            <p className="text-white/85 text-[15px] max-w-[480px] leading-relaxed mb-10 max-md:mb-7" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.3)' }}>
+              {listingType === 'sale' ? 'Find foreclosures, short sales, and off-market properties for pennies on the dollar. Your next big flip starts here.' : listingType === 'rent' ? 'Discover undervalued properties with massive rental yield potential. Perfect for serious investors.' : 'Exclusive access to distressed and underpriced real estate. Maximize your ROI with unbeatable wholesale deals.'}
+            </p>
           </div>
 
-          {/* Search Box — matches app search bar style */}
-          <div className="animate-slide-up max-w-[660px] w-full mt-8 max-lg:mt-4">
+          {/* Search Box */}
+          <div className="animate-slide-up max-w-[660px] w-full">
             <div className="flex gap-1 mb-[-1px] relative z-[1]">
               {[
                 { val: '', label: 'All' },

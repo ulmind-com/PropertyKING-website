@@ -183,7 +183,7 @@ export default function Home() {
             <h1 className="text-[clamp(36px,5.5vw,64px)] font-black text-white leading-[1.05] tracking-tighter mb-4" style={{ textShadow: '0 2px 16px rgba(0,0,0,0.5)' }}>
               <span className="block text-[clamp(26px,3.5vw,48px)]">Uncover Hidden</span>
               {listingType === 'sale' ? 'Fixer-Uppers' : listingType === 'rent' ? 'Cash-Flow Rentals' : 'Distressed Properties'}
-              <span className="block text-white/50 text-[clamp(26px,3.5vw,48px)] mt-1">Before Anyone Else</span>
+              <span className="block text-white/75 text-[clamp(26px,3.5vw,48px)] mt-1" style={{ WebkitTextStroke: '1px rgba(0,0,0,0.5)' }}>Before Anyone Else</span>
             </h1>
             <p className="text-white/90 text-[15px] max-w-[480px] leading-relaxed mb-10 max-md:mb-7" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}>
               {listingType === 'sale' ? 'Find foreclosures, short sales, and off-market properties for pennies on the dollar. Your next big flip starts here.' : listingType === 'rent' ? 'Discover undervalued properties with massive rental yield potential. Perfect for serious investors.' : 'Exclusive access to distressed and underpriced real estate. Maximize your ROI with unbeatable wholesale deals.'}

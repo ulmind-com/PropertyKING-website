@@ -160,34 +160,36 @@ export default function Home() {
         <div className="absolute inset-0 z-0">
           <img src="/prop.png" alt="" className="w-full h-full object-cover" />
         </div>
-        {/* Dark overlay for readability */}
+        {/* Lighter overlay — image clearly visible */}
         <div className="absolute inset-0 z-[1]" style={{
-          background: 'linear-gradient(180deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.45) 60%, rgba(0,0,0,0.7) 85%, #F5F5F5 100%)'
+          background: 'linear-gradient(180deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.25) 30%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.35) 78%, rgba(0,0,0,0.75) 90%, #F5F5F5 100%)'
         }} />
         <div className="relative z-[2] container-custom pt-[120px] pb-[60px] flex flex-col min-h-screen">
-          {/* Top Row — like app: avatar + location + bell */}
+          {/* Top Row — location */}
           <div className="animate-fade-in flex items-center gap-3 mb-10 max-md:mb-6">
             <div className="w-12 h-12 flex items-center justify-center">
               <Lottie animationData={locationAnimation} loop={true} className="w-full h-full" />
             </div>
             <div className="flex-1">
-              <span className="text-[11px] text-white/50 font-medium uppercase tracking-widest block mb-0.5">Location</span>
+              <span className="text-[11px] text-white/60 font-medium uppercase tracking-widest block mb-0.5">Location</span>
               <div className="flex items-center gap-1">
-                <span className="text-white font-extrabold text-[15px] tracking-tight">{locationName}</span>
+                <span className="text-white font-extrabold text-[15px] tracking-tight drop-shadow-lg">{locationName}</span>
               </div>
             </div>
           </div>
 
-          {/* Hero Text */}
+          {/* Hero Text — with backdrop blur for readability */}
           <div className="animate-fade-in flex-1 flex flex-col justify-center max-w-[700px]">
-            <h1 className="text-[clamp(38px,6vw,68px)] font-black text-white leading-[1.05] tracking-tighter mb-5" style={{ textShadow: '0 2px 24px rgba(0,0,0,0.4)' }}>
-              <span className="block text-[clamp(28px,4vw,52px)]">Uncover Hidden</span>
-              {listingType === 'sale' ? 'Fixer-Uppers' : listingType === 'rent' ? 'Cash-Flow Rentals' : 'Distressed Properties'}
-              <span className="block text-white/40 text-[clamp(28px,4vw,52px)] mt-1">Before Anyone Else</span>
-            </h1>
-            <p className="text-white/85 text-[15px] max-w-[480px] leading-relaxed mb-10 max-md:mb-7" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.3)' }}>
-              {listingType === 'sale' ? 'Find foreclosures, short sales, and off-market properties for pennies on the dollar. Your next big flip starts here.' : listingType === 'rent' ? 'Discover undervalued properties with massive rental yield potential. Perfect for serious investors.' : 'Exclusive access to distressed and underpriced real estate. Maximize your ROI with unbeatable wholesale deals.'}
-            </p>
+            <div className="inline-block rounded-3xl px-8 py-6 max-sm:px-5 max-sm:py-4" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+              <h1 className="text-[clamp(36px,5.5vw,64px)] font-black text-white leading-[1.05] tracking-tighter mb-3">
+                <span className="block text-[clamp(26px,3.5vw,48px)]">Uncover Hidden</span>
+                {listingType === 'sale' ? 'Fixer-Uppers' : listingType === 'rent' ? 'Cash-Flow Rentals' : 'Distressed Properties'}
+                <span className="block text-white/50 text-[clamp(26px,3.5vw,48px)] mt-1">Before Anyone Else</span>
+              </h1>
+              <p className="text-white/90 text-[15px] max-w-[480px] leading-relaxed">
+                {listingType === 'sale' ? 'Find foreclosures, short sales, and off-market properties for pennies on the dollar. Your next big flip starts here.' : listingType === 'rent' ? 'Discover undervalued properties with massive rental yield potential. Perfect for serious investors.' : 'Exclusive access to distressed and underpriced real estate. Maximize your ROI with unbeatable wholesale deals.'}
+              </p>
+            </div>
           </div>
 
           {/* Search Box */}

@@ -156,7 +156,9 @@ export default function Home() {
     <div>
       {/* ─── HERO — matches app gradient header ─── */}
       <section className="relative overflow-hidden" style={{
-        background: 'linear-gradient(180deg, #000000 0%, #1C1C1E 40%, #3A3A3C 75%, #F5F5F5 100%)',
+        backgroundImage: 'linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0.8) 85%, #F5F5F5 100%), url("/prop.png")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
         minHeight: '100vh'
       }}>
         <div className="relative z-[2] container-custom pt-[120px] pb-[60px] flex flex-col min-h-screen">

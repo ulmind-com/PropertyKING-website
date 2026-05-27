@@ -41,6 +41,7 @@ export default function PropertyDetails() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [contactPref, setContactPref] = useState('call');
+  const [fullScreenImg, setFullScreenImg] = useState(null);
 
   useEffect(() => {
     loadProperty();
@@ -244,22 +245,22 @@ export default function PropertyDetails() {
     <div className="pt-[72px]">
       {/* Gallery */}
       <div className="relative">
-        <div className="relative h-[480px] max-md:h-[280px] max-sm:h-[240px] overflow-hidden bg-neutral-100">
+        <div className="relative h-[480px] max-md:h-[280px] max-sm:h-[240px] overflow-hidden bg-neutral-100 cursor-pointer" onClick={() => setFullScreenImg(currentImg)}>
           <img src={images[currentImg]?.url} alt={images[currentImg]?.caption || property.title} className="w-full h-full object-cover transition-transform duration-500" />
           {images.length > 1 && (<>
-            <button className="absolute top-1/2 -translate-y-1/2 left-4 w-[42px] h-[42px] rounded-full bg-white/90 shadow-md flex items-center justify-center cursor-pointer border-none z-[2] text-neutral-900 transition-all hover:bg-white hover:scale-105" onClick={() => setCurrentImg(i => i > 0 ? i - 1 : images.length - 1)}>
+            <button className="absolute top-1/2 -translate-y-1/2 left-4 w-[42px] h-[42px] rounded-full bg-white/90 shadow-md flex items-center justify-center cursor-pointer border-none z-[2] text-neutral-900 transition-all hover:bg-white hover:scale-105" onClick={(e) => { e.stopPropagation(); setCurrentImg(i => i > 0 ? i - 1 : images.length - 1); }}>
               <ChevronLeft size={22} />
             </button>
-            <button className="absolute top-1/2 -translate-y-1/2 right-4 w-[42px] h-[42px] rounded-full bg-white/90 shadow-md flex items-center justify-center cursor-pointer border-none z-[2] text-neutral-900 transition-all hover:bg-white hover:scale-105" onClick={() => setCurrentImg(i => i < images.length - 1 ? i + 1 : 0)}>
+            <button className="absolute top-1/2 -translate-y-1/2 right-4 w-[42px] h-[42px] rounded-full bg-white/90 shadow-md flex items-center justify-center cursor-pointer border-none z-[2] text-neutral-900 transition-all hover:bg-white hover:scale-105" onClick={(e) => { e.stopPropagation(); setCurrentImg(i => i < images.length - 1 ? i + 1 : 0); }}>
               <ChevronRight size={22} />
             </button>
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-black/50 backdrop-blur-sm rounded-full text-white text-[13px] font-semibold">{currentImg + 1} / {images.length}</div>
           </>)}
           <div className="absolute top-4 right-4 flex gap-2">
-            <button className={`w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center border-none cursor-pointer transition-all text-white hover:bg-black/50 hover:scale-[1.08] ${isFav ? '!text-red-500' : ''}`} onClick={handleFavorite}>
+            <button className={`w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center border-none cursor-pointer transition-all text-white hover:bg-black/50 hover:scale-[1.08] ${isFav ? '!text-red-500' : ''}`} onClick={(e) => { e.stopPropagation(); handleFavorite(); }}>
               <Heart size={20} fill={isFav ? '#EF4444' : 'none'} />
             </button>
-            <button className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center border-none cursor-pointer transition-all text-white hover:bg-black/50 hover:scale-[1.08]" onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success('Link copied!'); }}>
+            <button className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center border-none cursor-pointer transition-all text-white hover:bg-black/50 hover:scale-[1.08]" onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(window.location.href); toast.success('Link copied!'); }}>
               <Share2 size={20} />
             </button>
           </div>
@@ -655,6 +656,26 @@ export default function PropertyDetails() {
               {inquiryLoading ? 'Submitting...' : 'Request Meeting'}
             </button>
           </div>
+        </div>
+      )}
+
+      {/* ─── Full Screen Image Modal ─── */}
+      {fullScreenImg !== null && (
+        <div className="fixed inset-0 bg-black/95 z-[400] flex items-center justify-center" onClick={() => setFullScreenImg(null)}>
+          <button className="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/10 flex items-center justify-center border-none cursor-pointer text-white hover:bg-white/20 z-[401]" onClick={() => setFullScreenImg(null)}>
+            <X size={24} />
+          </button>
+          <img src={images[fullScreenImg]?.url} alt="Full Screen" className="max-w-[95vw] max-h-[90vh] object-contain" onClick={e => e.stopPropagation()} />
+          
+          {images.length > 1 && (<>
+            <button className="absolute top-1/2 -translate-y-1/2 left-4 w-12 h-12 rounded-full bg-white/10 flex items-center justify-center cursor-pointer border-none z-[401] text-white transition-all hover:bg-white/20" onClick={(e) => { e.stopPropagation(); setFullScreenImg(i => i > 0 ? i - 1 : images.length - 1); }}>
+              <ChevronLeft size={28} />
+            </button>
+            <button className="absolute top-1/2 -translate-y-1/2 right-4 w-12 h-12 rounded-full bg-white/10 flex items-center justify-center cursor-pointer border-none z-[401] text-white transition-all hover:bg-white/20" onClick={(e) => { e.stopPropagation(); setFullScreenImg(i => i < images.length - 1 ? i + 1 : 0); }}>
+              <ChevronRight size={28} />
+            </button>
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white font-bold tracking-widest">{fullScreenImg + 1} / {images.length}</div>
+          </>)}
         </div>
       )}
     </div>

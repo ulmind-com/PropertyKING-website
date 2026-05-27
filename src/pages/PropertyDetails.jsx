@@ -665,8 +665,16 @@ export default function PropertyDetails() {
           <button className="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/10 flex items-center justify-center border-none cursor-pointer text-white hover:bg-white/20 z-[401]" onClick={() => setFullScreenImg(null)}>
             <X size={24} />
           </button>
-          <img src={images[fullScreenImg]?.url} alt="Full Screen" className="max-w-[95vw] max-h-[90vh] object-contain" onClick={e => e.stopPropagation()} />
           
+          {/* Current Image */}
+          <img key={images[fullScreenImg]?.url} src={images[fullScreenImg]?.url} alt="Full Screen" className="max-w-[95vw] max-h-[90vh] object-contain animate-fade-in" onClick={e => e.stopPropagation()} />
+          
+          {/* Preload next/prev to prevent delay */}
+          <div className="hidden">
+            <img src={images[fullScreenImg > 0 ? fullScreenImg - 1 : images.length - 1]?.url} alt="prev" />
+            <img src={images[fullScreenImg < images.length - 1 ? fullScreenImg + 1 : 0]?.url} alt="next" />
+          </div>
+
           {images.length > 1 && (<>
             <button className="absolute top-1/2 -translate-y-1/2 left-4 w-12 h-12 rounded-full bg-white/10 flex items-center justify-center cursor-pointer border-none z-[401] text-white transition-all hover:bg-white/20" onClick={(e) => { e.stopPropagation(); setFullScreenImg(i => i > 0 ? i - 1 : images.length - 1); }}>
               <ChevronLeft size={28} />

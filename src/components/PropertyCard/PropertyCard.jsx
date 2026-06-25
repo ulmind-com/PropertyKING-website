@@ -82,12 +82,7 @@ export default function PropertyCard({ property, onFavoriteToggle }) {
           <GitCompareArrows size={14} stroke="white" />
         </button>
 
-        {/* Image Count */}
-        {property.images?.length > 1 && (
-          <span className="absolute bottom-3 right-3 px-2.5 py-0.5 rounded-full bg-black/45 backdrop-blur-sm text-white text-[11px] font-semibold">
-            📷 {property.images.length}
-          </span>
-        )}
+
       </div>
 
       {/* Info */}

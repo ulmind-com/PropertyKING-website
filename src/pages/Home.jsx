@@ -106,11 +106,13 @@ export default function Home() {
       try {
         const params = { limit: 10 };
         if (listingType) params.listing_type = listingType;
-        const res = await propertyAPI.list(params);
+        const res = await propertyAPI.recommendations(params);
         setFeaturedProperties(res.data.properties || []);
       } catch(e) {}
     };
-    loadFeatured();
+    if (listingType) {
+      loadFeatured();
+    }
   }, [listingType]);
 
   const loadAmenities = async () => {
@@ -291,30 +293,36 @@ export default function Home() {
         return (
           <>
             {/* ─── Near Me Properties ─── */}
-            {(loading || finalNearby.length > 0) && (
-              <section className="py-[72px] max-md:py-[52px] bg-neutral-50/50 border-b border-neutral-100">
-                <div className="container-custom">
-                  <div className="flex justify-between items-end max-sm:items-center mb-9 gap-3">
-                    <div className="flex flex-col gap-1.5 flex-1">
-                      <div className="flex items-center gap-2 text-xs font-bold text-neutral-400 uppercase tracking-widest">
-                        <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600"><MapPin size={14} /></div>
-                        NEAR ME
-                      </div>
-                      <h2 className="text-[30px] max-sm:text-2xl font-extrabold text-neutral-900 tracking-tight leading-tight">Properties Near You</h2>
-                      <p className="text-[15px] max-sm:text-[13px] text-neutral-400 mt-1">Explore homes around {locationName}</p>
+            <section className="py-[72px] max-md:py-[52px] bg-neutral-50/50 border-b border-neutral-100">
+              <div className="container-custom">
+                <div className="flex justify-between items-end max-sm:items-center mb-9 gap-3">
+                  <div className="flex flex-col gap-1.5 flex-1">
+                    <div className="flex items-center gap-2 text-xs font-bold text-neutral-400 uppercase tracking-widest">
+                      <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600"><MapPin size={14} /></div>
+                      NEAR ME
                     </div>
-                    <Link to="/map" className="flex items-center justify-center gap-1 text-[13px] font-bold bg-blue-50 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-100 transition-colors shrink-0 whitespace-nowrap">
-                      View Map <ChevronRight size={14} />
-                    </Link>
+                    <h2 className="text-[30px] max-sm:text-2xl font-extrabold text-neutral-900 tracking-tight leading-tight">Properties Near You</h2>
+                    <p className="text-[15px] max-sm:text-[13px] text-neutral-400 mt-1">Explore homes around {locationName}</p>
                   </div>
-                  <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] max-md:grid-cols-1 gap-6 stagger-children">
-                    {loading
-                      ? Array(6).fill(null).map((_, i) => <PropertyCardSkeleton key={i} />)
-                      : finalNearby.map((prop) => <PropertyCard key={prop.id} property={prop} />)}
-                  </div>
+                  <Link to="/map" className="flex items-center justify-center gap-1 text-[13px] font-bold bg-blue-50 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-100 transition-colors shrink-0 whitespace-nowrap">
+                    View Map <ChevronRight size={14} />
+                  </Link>
                 </div>
-              </section>
-            )}
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] max-md:grid-cols-1 gap-6 stagger-children">
+                  {loading
+                    ? Array(6).fill(null).map((_, i) => <PropertyCardSkeleton key={i} />)
+                    : finalNearby.length > 0
+                    ? finalNearby.map((prop) => <PropertyCard key={prop.id} property={prop} />)
+                    : (
+                        <div className="col-span-full flex flex-col items-center gap-3 py-16 text-neutral-400 text-center">
+                          <Building2 size={44} />
+                          <h3 className="text-xl font-bold text-neutral-900">No properties yet</h3>
+                          <p>We couldn't find any properties near you right now.</p>
+                        </div>
+                      )}
+                </div>
+              </div>
+            </section>
 
             {/* ─── Featured Properties ─── */}
             <section className="py-[72px] max-md:py-[52px]">
@@ -349,38 +357,36 @@ export default function Home() {
             </section>
 
       {/* ─── Top Viewed ─── */}
-      {(loading || finalTopViewed.length > 0) && (
-        <section className="py-[72px] max-md:py-[52px] bg-neutral-50">
-          <div className="container-custom">
-            <div className="flex justify-between items-end max-sm:items-center mb-9 gap-3">
-              <div className="flex flex-col gap-1.5 flex-1">
-                <div className="flex items-center gap-2 text-xs font-bold text-neutral-400 uppercase tracking-widest">
-                  <div className="w-7 h-7 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-900"><TrendingUp size={14} /></div>
-                  TRENDING
-                </div>
-                <h2 className="text-[30px] max-sm:text-2xl font-extrabold text-neutral-900 tracking-tight leading-tight">Top Viewed</h2>
-                <p className="text-[15px] max-sm:text-[13px] text-neutral-400 mt-1">Most popular listings right now</p>
+      <section className="py-[72px] max-md:py-[52px] bg-neutral-50">
+        <div className="container-custom">
+          <div className="flex justify-between items-end max-sm:items-center mb-9 gap-3">
+            <div className="flex flex-col gap-1.5 flex-1">
+              <div className="flex items-center gap-2 text-xs font-bold text-neutral-400 uppercase tracking-widest">
+                <div className="w-7 h-7 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-900"><TrendingUp size={14} /></div>
+                TRENDING
               </div>
-              <Link to="/properties?sort_by=views_count&sort_order=desc" className="flex items-center justify-center gap-1 text-[13px] font-bold bg-neutral-100 text-neutral-900 px-4 py-2 rounded-full hover:bg-neutral-200 transition-colors shrink-0 whitespace-nowrap">
-                See all <ChevronRight size={14} />
-              </Link>
+              <h2 className="text-[30px] max-sm:text-2xl font-extrabold text-neutral-900 tracking-tight leading-tight">Top Viewed</h2>
+              <p className="text-[15px] max-sm:text-[13px] text-neutral-400 mt-1">Most popular listings right now</p>
             </div>
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] max-md:grid-cols-1 gap-6 stagger-children">
-              {loading
-                  ? Array(4).fill(null).map((_, i) => <PropertyCardSkeleton key={i} />)
-                  : finalTopViewed.length > 0
-                  ? finalTopViewed.map((prop) => <PropertyCard key={prop.id} property={prop} />)
-                  : (
-                        <div className="col-span-full flex flex-col items-center gap-3 py-16 text-neutral-400 text-center">
-                          <Building2 size={44} />
-                          <h3 className="text-xl font-bold text-neutral-900">No properties yet</h3>
-                          <p>Be the first to list a property!</p>
-                        </div>
-                      )}
-            </div>
+            <Link to="/properties?sort_by=views_count&sort_order=desc" className="flex items-center justify-center gap-1 text-[13px] font-bold bg-neutral-100 text-neutral-900 px-4 py-2 rounded-full hover:bg-neutral-200 transition-colors shrink-0 whitespace-nowrap">
+              See all <ChevronRight size={14} />
+            </Link>
           </div>
-        </section>
-      )}
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] max-md:grid-cols-1 gap-6 stagger-children">
+            {loading
+                ? Array(4).fill(null).map((_, i) => <PropertyCardSkeleton key={i} />)
+                : finalTopViewed.length > 0
+                ? finalTopViewed.map((prop) => <PropertyCard key={prop.id} property={prop} />)
+                : (
+                      <div className="col-span-full flex flex-col items-center gap-3 py-16 text-neutral-400 text-center">
+                        <Building2 size={44} />
+                        <h3 className="text-xl font-bold text-neutral-900">No properties yet</h3>
+                        <p>Be the first to list a property!</p>
+                      </div>
+                    )}
+          </div>
+        </div>
+      </section>
       </>
     );
   })()}

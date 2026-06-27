@@ -10,6 +10,7 @@ import { propertyAPI, propertyTypeAPI, amenityAPI } from '../api';
 
 const SORT_OPTIONS = [
   { key: 'created_at_desc', label: 'Newest First', sort_by: 'created_at', sort_order: 'desc' },
+  { key: 'favorites_desc', label: 'Featured (Most Popular)', sort_by: 'favorites_count', sort_order: 'desc' },
   { key: 'price_asc', label: 'Price: Low → High', sort_by: 'price', sort_order: 'asc' },
   { key: 'price_desc', label: 'Price: High → Low', sort_by: 'price', sort_order: 'desc' },
   { key: 'views_desc', label: 'Most Viewed', sort_by: 'views_count', sort_order: 'desc' },
@@ -54,8 +55,8 @@ export default function PropertyListing() {
     max_sqft: '',
     city: searchParams.get('city') || '',
     state: searchParams.get('state') || '',
-    sort_by: 'created_at',
-    sort_order: 'desc',
+    sort_by: searchParams.get('sort_by') || 'created_at',
+    sort_order: searchParams.get('sort_order') || 'desc',
     page: parseInt(searchParams.get('page')) || 1,
   });
   const [selectedAmenities, setSelectedAmenities] = useState({});
@@ -88,8 +89,7 @@ export default function PropertyListing() {
     } catch (e) { console.error(e); } finally { setLoading(false); }
   };
 
-  const sortKey = `${filters.sort_by === 'created_at' ? 'created_at' : filters.sort_by === 'price' ? 'price' : filters.sort_by === 'views_count' ? 'views' : 'sqft'}_${filters.sort_order}`;
-  const currentSort = SORT_OPTIONS.find(s => s.key === sortKey) || SORT_OPTIONS[0];
+  const currentSort = SORT_OPTIONS.find(s => s.sort_by === filters.sort_by && s.sort_order === filters.sort_order) || SORT_OPTIONS[0];
 
   const applyFilters = () => {
     setFilters(prev => ({ ...prev, page: 1 }));

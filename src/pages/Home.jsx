@@ -284,11 +284,18 @@ export default function Home() {
 
       {/* Deduplication logic */}
       {(() => {
+        // Priority: Near You → Top Viewed → Featured (Featured = "the rest", no duplicates)
         const finalNearby = nearbyProperties.slice(0, 5);
         const nearbyIds = new Set(finalNearby.map(p => p.id));
-        const finalFeatured = featuredProperties.filter(p => !nearbyIds.has(p.id)).slice(0, 5);
-        const featuredIds = new Set(finalFeatured.map(p => p.id));
-        const finalTopViewed = topViewedProperties.filter(p => !nearbyIds.has(p.id) && !featuredIds.has(p.id)).slice(0, 5);
+        // Top Viewed = genuinely most-viewed (views > 0), excluding the Near You ones
+        const finalTopViewed = topViewedProperties
+          .filter(p => !nearbyIds.has(p.id) && (p.views_count || 0) > 0)
+          .slice(0, 5);
+        const topViewedIds = new Set(finalTopViewed.map(p => p.id));
+        // Featured = everything else, not already shown in Near You or Top Viewed
+        const finalFeatured = featuredProperties
+          .filter(p => !nearbyIds.has(p.id) && !topViewedIds.has(p.id))
+          .slice(0, 5);
 
         return (
           <>
@@ -330,7 +337,7 @@ export default function Home() {
                     <h2 className="text-[30px] max-sm:text-2xl font-extrabold text-neutral-900 tracking-tight leading-tight">Featured Properties</h2>
                     <p className="text-[15px] max-sm:text-[13px] text-neutral-400 mt-1">Hand-picked distressed & off-market listings for you</p>
                   </div>
-                  <Link to="/properties" className="flex items-center justify-center gap-1 text-[13px] font-bold bg-neutral-100 text-neutral-900 px-4 py-2 rounded-full hover:bg-neutral-200 transition-colors shrink-0 whitespace-nowrap">
+                  <Link to="/properties?sort_by=favorites_count&sort_order=desc" className="flex items-center justify-center gap-1 text-[13px] font-bold bg-neutral-100 text-neutral-900 px-4 py-2 rounded-full hover:bg-neutral-200 transition-colors shrink-0 whitespace-nowrap">
                     See all <ChevronRight size={14} />
                   </Link>
                 </div>

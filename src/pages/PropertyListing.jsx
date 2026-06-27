@@ -53,6 +53,7 @@ export default function PropertyListing() {
     bathrooms_min: searchParams.get('bathrooms_min') || '',
     min_sqft: searchParams.get('min_sqft') || '',
     max_sqft: '',
+    min_views: searchParams.get('min_views') || '',
     city: searchParams.get('city') || '',
     state: searchParams.get('state') || '',
     sort_by: searchParams.get('sort_by') || 'created_at',
@@ -99,7 +100,7 @@ export default function PropertyListing() {
   };
 
   const clearFilters = () => {
-    setFilters({ search: '', listing_type: '', property_type_id: '', min_price: '', max_price: '', bedrooms_min: '', bathrooms_min: '', min_sqft: '', max_sqft: '', city: '', state: '', sort_by: 'created_at', sort_order: 'desc', page: 1 });
+    setFilters({ search: '', listing_type: '', property_type_id: '', min_price: '', max_price: '', bedrooms_min: '', bathrooms_min: '', min_sqft: '', max_sqft: '', min_views: '', city: '', state: '', sort_by: 'created_at', sort_order: 'desc', page: 1 });
     setSelectedAmenities({});
     setTimeout(() => setLoadTrigger(t => t + 1), 0);
   };

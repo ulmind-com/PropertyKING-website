@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { Home, Mail, Phone, MapPin } from 'lucide-react';
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaYoutube } from 'react-icons/fa';
-import Lottie from 'lottie-react';
+import LottieReact from 'lottie-react';
 import toast from 'react-hot-toast';
 import appStoreLottie from '../../../lotties/AppStore.json';
 import playStoreLottie from '../../../lotties/GooglePlayButton.json';
+
+const Lottie = LottieReact.default || LottieReact;
 
 export default function Footer() {
   return (

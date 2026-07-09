@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'; // Trigger Vercel deployment
-import Lottie from 'lottie-react';
+import LottieReact from 'lottie-react';
 import toast from 'react-hot-toast';
 import playStoreLottie from '../../../lotties/GooglePlayButton.json';
 import appStoreLottie from '../../../lotties/AppStore.json';
+
+const Lottie = LottieReact.default || LottieReact;
 
 export default function SmartAppBanner() {
   const [isVisible, setIsVisible] = useState(false);

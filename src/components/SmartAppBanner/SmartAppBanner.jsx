@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'; // Trigger Vercel deployment
 import Lottie from 'lottie-react';
 import toast from 'react-hot-toast';
 import playStoreLottie from '../../../lotties/GooglePlayButton.json';

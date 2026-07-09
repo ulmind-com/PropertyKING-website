@@ -42,6 +42,7 @@ const CompareProperties = lazyRetry(() => import('./pages/CompareProperties'));
 const PrivacyPolicy = lazyRetry(() => import('./pages/PrivacyPolicy'));
 
 import CompareFloatingButton from './components/CompareFloatingButton/CompareFloatingButton';
+import SmartAppBanner from './components/SmartAppBanner/SmartAppBanner';
 
 // Loading skeleton shown while a page chunk is downloading
 function PageLoader() {
@@ -104,6 +105,7 @@ function App() {
           </main>
           <Footer />
           <CompareFloatingButton />
+          <SmartAppBanner />
           <Toaster position="top-right" toastOptions={{ duration: 3000, style: { background: '#0A0A0A', color: '#fff', borderRadius: '16px', fontSize: '14px', fontWeight: 600, fontFamily: 'Raleway, sans-serif' }, success: { iconTheme: { primary: '#10B981', secondary: '#fff' } }, error: { iconTheme: { primary: '#EF4444', secondary: '#fff' } } }} />
         </div>
       </BrowserRouter>

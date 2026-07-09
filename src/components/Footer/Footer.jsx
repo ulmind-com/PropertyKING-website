@@ -1,6 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Home, Mail, Phone, MapPin } from 'lucide-react';
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaYoutube } from 'react-icons/fa';
+import Lottie from 'lottie-react';
+import toast from 'react-hot-toast';
+import appStoreLottie from '../../../lotties/AppStore.json';
+import playStoreLottie from '../../../lotties/GooglePlayButton.json';
 
 export default function Footer() {
   return (
@@ -29,6 +33,26 @@ export default function Footer() {
                 {s.icon}
               </a>
             ))}
+          </div>
+
+          <div className="mt-5 flex flex-col gap-3">
+            <h4 className="text-white text-[15px] font-bold tracking-tight">Get the App</h4>
+            <div className="flex gap-3">
+              <a 
+                href="https://play.google.com/store/apps/details?id=com.propertykingpro.app&pcampaignid=web_share"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-[140px] h-[48px] hover:-translate-y-1 transition-all duration-300 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 p-0 cursor-pointer overflow-hidden rounded-xl flex items-center justify-center shadow-lg"
+              >
+                <Lottie animationData={playStoreLottie} loop={true} style={{ width: '130%', transform: 'scale(1.15)' }} />
+              </a>
+              <button 
+                onClick={() => toast('App Store version coming soon!', { icon: '🍏' })}
+                className="w-[140px] h-[48px] hover:-translate-y-1 transition-all duration-300 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 p-0 cursor-pointer overflow-hidden rounded-xl flex items-center justify-center shadow-lg"
+              >
+                <Lottie animationData={appStoreLottie} loop={true} style={{ width: '130%', transform: 'scale(1.15)' }} />
+              </button>
+            </div>
           </div>
         </div>
 

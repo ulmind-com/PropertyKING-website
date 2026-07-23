@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import PropertyCard, { PropertyCardSkeleton } from '../components/PropertyCard/PropertyCard';
 import { propertyAPI, propertyTypeAPI, amenityAPI, userAPI } from '../api';
+import LocationPickerModal from '../components/LocationPickerModal/LocationPickerModal';
 import LottieModule from 'lottie-react';
 import locationAnimation from '../../lotties/location.json';
 
@@ -51,29 +52,28 @@ export default function Home() {
   const [selAmenities, setSelAmenities] = useState({});
   const [locationName, setLocationName] = useState('Detecting...');
   const [nearbyProperties, setNearbyProperties] = useState([]);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
+  const [userCoords, setUserCoords] = useState({ lat: 22.0, lng: 88.0 });
 
   useEffect(() => { loadData(); loadAmenities(); }, []);
 
   // Fetch location automatically (free Nominatim reverse geocoding)
   useEffect(() => {
     if (!navigator.geolocation) {
-      setLocationName('Location denied');
+      setLocationName('Select Location');
       return;
     }
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
+        setUserCoords({ lat, lng });
         try {
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
           const data = await res.json();
           const city = data.address.city || data.address.town || data.address.village || data.address.county || 'Unknown';
           const state = data.address.state || '';
-          const locName = state ? `${city}, ${state}` : city;
-          setLocationName(locName);
-
-          // Fire-and-forget: persist to backend for admin visibility
-          userAPI.updateLocation({ lat, lon: lng, name: locName }).catch(() => {});
+          setLocationName(state ? `${city}, ${state}` : city);
           
           // Fetch nearby properties
           const nearbyRes = await propertyAPI.nearby({ lat, lng, radius_miles: 25, limit: 15 });
@@ -82,10 +82,22 @@ export default function Home() {
           setLocationName('Unknown location');
         }
       },
-      () => setLocationName('Location denied'),
+      () => setLocationName('Select Location'),
       { timeout: 10000 }
     );
   }, []);
+
+  // Handle location picked from modal
+  const handleLocationPicked = ({ lat, lng, name }) => {
+    setLocationName(name);
+    setUserCoords({ lat, lng });
+    // Fire-and-forget: persist to backend for admin visibility
+    userAPI.updateLocation({ lat, lon: lng, name }).catch(() => {});
+    // Refresh nearby properties
+    propertyAPI.nearby({ lat, lng, radius_miles: 25, limit: 15 })
+      .then(res => setNearbyProperties(res.data?.properties || []))
+      .catch(() => {});
+  };
 
   const loadData = async () => {
     try {
@@ -172,14 +184,15 @@ export default function Home() {
         }} />
         <div className="relative z-[2] container-custom pt-[120px] pb-[60px] flex flex-col min-h-screen">
           {/* Top Row — location */}
-          <div className="animate-fade-in flex items-center gap-3 mb-10 max-md:mb-6">
+          <div className="animate-fade-in flex items-center gap-3 mb-10 max-md:mb-6 cursor-pointer group" onClick={() => setShowLocationPicker(true)}>
             <div className="w-12 h-12 flex items-center justify-center">
               <Lottie animationData={locationAnimation} loop={true} className="w-full h-full" />
             </div>
             <div className="flex-1">
               <span className="text-[11px] text-white/60 font-medium uppercase tracking-widest block mb-0.5">Location</span>
               <div className="flex items-center gap-1">
-                <span className="text-white font-extrabold text-[15px] tracking-tight drop-shadow-lg">{locationName}</span>
+                <span className="text-white font-extrabold text-[15px] tracking-tight drop-shadow-lg group-hover:text-green-400 transition-colors">{locationName}</span>
+                <ChevronDown size={14} className="text-white/50 group-hover:text-green-400 transition-colors" />
               </div>
             </div>
           </div>
@@ -569,6 +582,15 @@ export default function Home() {
         </div>
       </div>
     )}
+
+    {/* Location Picker Modal */}
+    <LocationPickerModal
+      isOpen={showLocationPicker}
+      onClose={() => setShowLocationPicker(false)}
+      onConfirm={handleLocationPicked}
+      initialLat={userCoords.lat}
+      initialLng={userCoords.lng}
+    />
     </>
   );
 }

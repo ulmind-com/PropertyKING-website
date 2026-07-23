@@ -7,7 +7,7 @@ import {
   Bed, Bath, Maximize, CheckCircle2, PlusCircle
 } from 'lucide-react';
 import PropertyCard, { PropertyCardSkeleton } from '../components/PropertyCard/PropertyCard';
-import { propertyAPI, propertyTypeAPI, amenityAPI } from '../api';
+import { propertyAPI, propertyTypeAPI, amenityAPI, userAPI } from '../api';
 import LottieModule from 'lottie-react';
 import locationAnimation from '../../lotties/location.json';
 
@@ -69,7 +69,11 @@ export default function Home() {
           const data = await res.json();
           const city = data.address.city || data.address.town || data.address.village || data.address.county || 'Unknown';
           const state = data.address.state || '';
-          setLocationName(state ? `${city}, ${state}` : city);
+          const locName = state ? `${city}, ${state}` : city;
+          setLocationName(locName);
+
+          // Fire-and-forget: persist to backend for admin visibility
+          userAPI.updateLocation({ lat, lon: lng, name: locName }).catch(() => {});
           
           // Fetch nearby properties
           const nearbyRes = await propertyAPI.nearby({ lat, lng, radius_miles: 25, limit: 15 });

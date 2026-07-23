@@ -53,6 +53,7 @@ export const userAPI = {
   },
   updateFCMToken: (token) => api.put('/users/me/fcm-token', { fcm_token: token }),
   getPublicProfile: (userId) => api.get(`/users/${userId}/public`),
+  updateLocation: (data) => api.put('/users/me/location', data),
   deleteAccount: () => api.delete('/users/me'),
 };
 

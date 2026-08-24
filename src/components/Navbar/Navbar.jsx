@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Heart, Bell, Menu, X, User, LogOut, Home, PlusCircle, ChevronDown } from 'lucide-react';
+import { Heart, Bell, Menu, X, User, LogOut, Home, PlusCircle, ChevronDown, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { notificationAPI } from '../../api';
 
@@ -83,6 +83,7 @@ export default function Navbar() {
           {[
             { path: '/', label: 'Home' },
             { path: '/properties', label: 'Properties' },
+            { path: '/distressed', label: 'Distressed' },
             { path: '/map', label: 'Map' },
             { path: '/about', label: 'About' },
           ].map(({ path, label }) => (
@@ -168,6 +169,9 @@ export default function Navbar() {
                     </Link>
                     <Link to="/my-listings" className="flex items-center gap-2.5 px-3 py-2.5 text-sm text-neutral-500 rounded-xl transition-all hover:bg-neutral-100 hover:text-neutral-900 w-full font-medium">
                       <Home size={16} /> My Listings
+                    </Link>
+                    <Link to="/my-claims" className="flex items-center gap-2.5 px-3 py-2.5 text-sm text-neutral-500 rounded-xl transition-all hover:bg-neutral-100 hover:text-neutral-900 w-full font-medium">
+                      <ShieldCheck size={16} /> My Claims
                     </Link>
                     <Link to="/favorites" className="flex items-center gap-2.5 px-3 py-2.5 text-sm text-neutral-500 rounded-xl transition-all hover:bg-neutral-100 hover:text-neutral-900 w-full font-medium">
                       <Heart size={16} /> Favorites

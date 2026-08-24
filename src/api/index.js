@@ -73,6 +73,21 @@ export const propertyAPI = {
   toggleStatus: (id) => api.put(`/properties/${id}/toggle-status`),
 };
 
+// ─── Distressed property claims ───
+// Claiming needs admin approval; once approved the property lands in the
+// user's My Listings and their edits go through the approval queue below.
+export const claimAPI = {
+  submit: (propertyId, data) => api.post(`/claims/${propertyId}`, data),
+  mine: (params) => api.get('/claims/my', { params }),
+  cancel: (claimId) => api.delete(`/claims/${claimId}`),
+};
+
+export const editRequestAPI = {
+  submit: (propertyId, data) => api.post(`/edit-requests/${propertyId}`, data),
+  mine: (params) => api.get('/edit-requests/my', { params }),
+  cancel: (requestId) => api.delete(`/edit-requests/${requestId}`),
+};
+
 // ─── Property Types ───
 export const propertyTypeAPI = {
   list: () => api.get('/property-types'),

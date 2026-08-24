@@ -6,9 +6,11 @@ import {
   CheckCircle2, Layers, Video, ExternalLink, Navigation, Play,
   Image as ImageIcon, X, Clock, MessageSquare, PhoneCall, Users, VideoIcon
 } from 'lucide-react';
-import { propertyAPI, inquiryAPI, favoriteAPI } from '../api';
+import { propertyAPI, inquiryAPI, favoriteAPI, claimAPI } from '../api';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import DistressPanel from '../components/DistressPanel/DistressPanel';
+import { distressLabel, distressClass } from '../utils/distress';
 
 const getYouTubeId = (url) => {
   if (!url) return null;
@@ -283,6 +285,11 @@ export default function PropertyDetails() {
           {/* Header */}
           <div className="mb-6">
             <div className="flex gap-2 mb-3.5 flex-wrap">
+              {property.distress?.is_distressed && (
+                <span className={`px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wide ${distressClass(property.distress.type)}`}>
+                  {distressLabel(property.distress.type)}
+                </span>
+              )}
               <span className={`px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wide ${property.listing_type === 'sale' ? 'bg-neutral-900 text-white' : property.listing_type === 'rent' ? 'bg-violet-500 text-white' : 'bg-amber-500 text-white'}`}>
                 {property.listing_type === 'sale' ? 'For Sale' : property.listing_type === 'rent' ? 'For Rent' : 'For Lease'}
               </span>
@@ -309,6 +316,12 @@ export default function PropertyDetails() {
                 </div>
               ))}
             </div>
+          )}
+
+          {/* Foreclosure facts (when distressed) + the claim entry point.
+              Every imported listing is claimable, not just distressed ones. */}
+          {(property.distress?.is_distressed || property.source || property.claim?.status) && (
+            <DistressPanel property={property} onClaimed={loadProperty} />
           )}
 
           {/* Lister Card */}

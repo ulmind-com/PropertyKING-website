@@ -40,6 +40,8 @@ const AddProperty = lazyRetry(() => import('./pages/AddProperty'));
 const MapExplore = lazyRetry(() => import('./pages/MapExplore'));
 const CompareProperties = lazyRetry(() => import('./pages/CompareProperties'));
 const PrivacyPolicy = lazyRetry(() => import('./pages/PrivacyPolicy'));
+const DistressedProperties = lazyRetry(() => import('./pages/DistressedProperties'));
+const MyClaims = lazyRetry(() => import('./pages/MyClaims'));
 
 import CompareFloatingButton from './components/CompareFloatingButton/CompareFloatingButton';
 import SmartAppBanner from './components/SmartAppBanner/SmartAppBanner';
@@ -77,6 +79,8 @@ function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/properties" element={<PropertyListing />} />
                   <Route path="/property/:slug" element={<PropertyDetails />} />
+                  <Route path="/distressed" element={<DistressedProperties />} />
+                  <Route path="/my-claims" element={<MyClaims />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />

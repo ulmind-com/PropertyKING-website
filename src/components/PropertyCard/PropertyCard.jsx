@@ -3,6 +3,7 @@ import { Heart, MapPin, Bed, Bath, Maximize, GitCompareArrows } from 'lucide-rea
 import { useState } from 'react';
 import { favoriteAPI } from '../../api';
 import { useCompare } from '../../context/CompareContext';
+import { distressLabel, distressClass, discountPct, formatMoney, daysUntil } from '../../utils/distress';
 
 export default function PropertyCard({ property, onFavoriteToggle }) {
   const [isFav, setIsFav] = useState(property.is_favorited || false);
@@ -13,6 +14,10 @@ export default function PropertyCard({ property, onFavoriteToggle }) {
   const primaryImage = property.images?.find(i => i.is_primary)?.url
     || property.images?.[0]?.url
     || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600';
+
+  const isDistressed = !!property.distress?.is_distressed;
+  const discount = discountPct(property);
+  const auctionIn = daysUntil(property.distress?.auction_date);
 
   const formatPrice = (price, unit) => {
     if (!price) return '$0';
@@ -48,18 +53,36 @@ export default function PropertyCard({ property, onFavoriteToggle }) {
         />
 
         {/* Badges */}
-        <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
-          <span className={`px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wide
-            ${property.listing_type === 'sale' ? 'bg-neutral-900 text-white' : property.listing_type === 'rent' ? 'bg-violet-500 text-white' : 'bg-amber-500 text-white'}
-          `}>
-            {property.listing_type === 'sale' ? 'For Sale' : property.listing_type === 'rent' ? 'For Rent' : 'For Lease'}
-          </span>
-          {property.property_type_name && (
+        <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap pr-14">
+          {isDistressed ? (
+            <span className={`px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wide ${distressClass(property.distress.type)}`}>
+              {distressLabel(property.distress.type, true)}
+            </span>
+          ) : (
+            <span className={`px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wide
+              ${property.listing_type === 'sale' ? 'bg-neutral-900 text-white' : property.listing_type === 'rent' ? 'bg-violet-500 text-white' : 'bg-amber-500 text-white'}
+            `}>
+              {property.listing_type === 'sale' ? 'For Sale' : property.listing_type === 'rent' ? 'For Rent' : 'For Lease'}
+            </span>
+          )}
+          {discount > 0 && (
+            <span className="px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wide bg-emerald-600 text-white">
+              {discount}% below value
+            </span>
+          )}
+          {property.property_type_name && !isDistressed && (
             <span className="px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wide bg-white/90 text-neutral-900 backdrop-blur-sm">
               {property.property_type_name}
             </span>
           )}
         </div>
+
+        {/* Auction countdown */}
+        {auctionIn != null && auctionIn >= 0 && (
+          <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-md bg-black/75 text-white text-[10px] font-bold backdrop-blur-sm">
+            Auction in {auctionIn} day{auctionIn === 1 ? '' : 's'}
+          </div>
+        )}
 
         {/* Favorite */}
         <button
@@ -91,8 +114,22 @@ export default function PropertyCard({ property, onFavoriteToggle }) {
           <span className="text-xl font-extrabold text-neutral-900 tracking-tight">
             {formatPrice(property.price, property.price_unit)}
           </span>
-          {property.details?.hoa_fee > 0 && (
+          {isDistressed && property.distress?.estimated_value ? (
+            <span className="text-[11px] font-medium text-neutral-400 line-through">
+              {formatMoney(property.distress.estimated_value)}
+            </span>
+          ) : property.details?.hoa_fee > 0 ? (
             <span className="text-[11px] font-medium text-neutral-400">+${property.details.hoa_fee}/mo HOA</span>
+          ) : null}
+          {property.claim?.status === 'unclaimed' && isDistressed && (
+            <span className="ml-auto px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-wide">
+              Claimable
+            </span>
+          )}
+          {property.claim?.status === 'pending' && (
+            <span className="ml-auto px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold uppercase tracking-wide">
+              Claim pending
+            </span>
           )}
         </div>
 

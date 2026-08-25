@@ -6,7 +6,7 @@ import {
   CheckCircle2, Layers, Video, ExternalLink, Navigation, Play,
   Image as ImageIcon, X, Clock, MessageSquare, PhoneCall, Users, VideoIcon
 } from 'lucide-react';
-import { propertyAPI, inquiryAPI, favoriteAPI, claimAPI } from '../api';
+import { propertyAPI, inquiryAPI, favoriteAPI } from '../api';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import DistressPanel from '../components/DistressPanel/DistressPanel';

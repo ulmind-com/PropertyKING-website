@@ -20,7 +20,8 @@ export default function PropertyCard({ property, onFavoriteToggle }) {
   const auctionIn = daysUntil(property.distress?.auction_date);
 
   const formatPrice = (price, unit) => {
-    if (!price) return '$0';
+    // Auction listings often carry no list price; "$0" would read as free.
+    if (!price) return 'Price on request';
     const formatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(price);
     if (unit === 'per_month') return `${formatted}/mo`;
     if (unit === 'per_night') return `${formatted}/night`;

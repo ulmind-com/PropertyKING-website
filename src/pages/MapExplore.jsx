@@ -34,7 +34,8 @@ const toCardShape = (pin) => ({
 });
 
 const formatPrice = (price, unit) => {
-  if (!price) return '$0';
+  // Auction listings often carry no list price; "$0" would read as free.
+  if (!price) return 'Price on request';
   const f = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(price);
   return unit === 'per_month' ? `${f}/mo` : f;
 };

@@ -21,6 +21,18 @@ const getCoords = (p) => {
   return null;
 };
 
+const toCardShape = (pin) => ({
+  ...pin,
+  location: {
+    city: pin.city, state: pin.state, address: pin.address,
+    coordinates: { type: 'Point', coordinates: [pin.lng, pin.lat] },
+  },
+  details: {
+    bedrooms: pin.bedrooms, bathrooms: pin.bathrooms, total_sqft: pin.total_sqft,
+  },
+  images: pin.image ? [{ url: pin.image, is_primary: true }] : [],
+});
+
 const formatPrice = (price, unit) => {
   if (!price) return '$0';
   const f = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(price);
@@ -163,10 +175,17 @@ export default function MapExplore() {
   const loadProperties = async (coords, radiusMiles = 50) => {
     setLoading(true);
     try {
-      const res = await propertyAPI.nearby({ lat: coords.lat, lng: coords.lng, radius_miles: radiusMiles, limit: 10 });
-      setProperties(res.data?.properties || []);
+      // Map pins are a slim payload, so we can show every match in range
+      // rather than the first page of full property documents.
+      const res = await propertyAPI.mapPins({
+        lat: coords.lat, lng: coords.lng, radius_miles: radiusMiles, limit: 2000,
+      });
+      setProperties((res.data?.pins || []).map(toCardShape));
     } catch(e) {
-      try { const r = await propertyAPI.list({ limit: 10 }); setProperties(r.data?.properties || []); } catch(e2) {}
+      try {
+        const r = await propertyAPI.mapPins({ limit: 2000 });
+        setProperties((r.data?.pins || []).map(toCardShape));
+      } catch(e2) {}
     }
     setLoading(false);
   };

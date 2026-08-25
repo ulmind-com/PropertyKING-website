@@ -82,7 +82,7 @@ export default function Home() {
           userAPI.updateLocation({ lat, lon: lng, name: locName }).catch(() => {});
           
           // Fetch nearby properties
-          const nearbyRes = await propertyAPI.nearby({ lat, lng, radius_miles: 25, limit: 15 });
+          const nearbyRes = await propertyAPI.nearby({ lat, lng, radius_miles: 25, limit: 40 });
           setNearbyProperties(nearbyRes.data?.properties || []);
         } catch(e) {
           setLocationName('Unknown location');
@@ -100,7 +100,7 @@ export default function Home() {
     // Fire-and-forget: persist to backend for admin visibility
     userAPI.updateLocation({ lat, lon: lng, name }).catch(() => {});
     // Refresh nearby properties
-    propertyAPI.nearby({ lat, lng, radius_miles: 25, limit: 15 })
+    propertyAPI.nearby({ lat, lng, radius_miles: 25, limit: 40 })
       .then(res => setNearbyProperties(res.data?.properties || []))
       .catch(() => {});
   };
@@ -109,8 +109,8 @@ export default function Home() {
     try {
       const [typesRes, propsRes, topRes] = await Promise.allSettled([
         propertyTypeAPI.list(),
-        propertyAPI.recommendations({ limit: 15 }),
-        propertyAPI.topViewed({ limit: 15 }),
+        propertyAPI.recommendations({ limit: 40 }),
+        propertyAPI.topViewed({ limit: 40 }),
       ]);
       if (typesRes.status === 'fulfilled' && typesRes.value.data?.length > 0)
         setPropertyTypes(typesRes.value.data);
@@ -128,7 +128,7 @@ export default function Home() {
   useEffect(() => {
     const loadFeatured = async () => {
       try {
-        const params = { limit: 15 };
+        const params = { limit: 40 };
         if (listingType) params.listing_type = listingType;
         const res = await propertyAPI.recommendations(params);
         setFeaturedProperties(res.data.properties || []);
@@ -311,17 +311,19 @@ export default function Home() {
       {/* Deduplication logic */}
       {(() => {
         // Priority: Near You → Top Viewed → Featured (Featured = "the rest", no duplicates)
-        const finalNearby = nearbyProperties.slice(0, 5);
+        // Each row shows up to this many; "See all" leads to the full list.
+        const ROW_SIZE = 20;
+        const finalNearby = nearbyProperties.slice(0, ROW_SIZE);
         const nearbyIds = new Set(finalNearby.map(p => p.id));
         // Top Viewed = genuinely most-viewed (views > 0), excluding the Near You ones
         const finalTopViewed = topViewedProperties
           .filter(p => !nearbyIds.has(p.id) && (p.views_count || 0) > 0)
-          .slice(0, 5);
+          .slice(0, ROW_SIZE);
         const topViewedIds = new Set(finalTopViewed.map(p => p.id));
         // Featured = everything else, not already shown in Near You or Top Viewed
         const finalFeatured = featuredProperties
           .filter(p => !nearbyIds.has(p.id) && !topViewedIds.has(p.id))
-          .slice(0, 5);
+          .slice(0, ROW_SIZE);
 
         return (
           <>

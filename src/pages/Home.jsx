@@ -42,6 +42,8 @@ export default function Home() {
   const [listingType, setListingType] = useState('');
   const [propertyTypes, setPropertyTypes] = useState(FALLBACK_TYPES);
   const [featuredProperties, setFeaturedProperties] = useState([]);
+  // Total matching listings, not just the page shown in the carousel
+  const [totalProperties, setTotalProperties] = useState(0);
   const [topViewedProperties, setTopViewedProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   // Filter modal state
@@ -112,8 +114,10 @@ export default function Home() {
       ]);
       if (typesRes.status === 'fulfilled' && typesRes.value.data?.length > 0)
         setPropertyTypes(typesRes.value.data);
-      if (propsRes.status === 'fulfilled')
+      if (propsRes.status === 'fulfilled') {
         setFeaturedProperties(propsRes.value.data.properties || []);
+        setTotalProperties(propsRes.value.data.total || 0);
+      }
       if (topRes.status === 'fulfilled')
         setTopViewedProperties(topRes.value.data.properties || []);
     } catch (err) { console.error(err); }
@@ -128,6 +132,7 @@ export default function Home() {
         if (listingType) params.listing_type = listingType;
         const res = await propertyAPI.recommendations(params);
         setFeaturedProperties(res.data.properties || []);
+        setTotalProperties(res.data.total || 0);
       } catch(e) {}
     };
     if (listingType) {
@@ -260,7 +265,7 @@ export default function Home() {
           {/* Stats row — dynamic */}
           <div className="animate-slide-up flex items-center mt-10 max-md:mt-7">
             {[
-              { n: featuredProperties.length > 0 ? `${featuredProperties.length}+` : '...', l: listingType === 'sale' ? 'For Sale' : listingType === 'rent' ? 'For Rent' : 'Properties' },
+              { n: totalProperties > 0 ? totalProperties.toLocaleString() : (featuredProperties.length ? `${featuredProperties.length}+` : '...'), l: listingType === 'sale' ? 'For Sale' : listingType === 'rent' ? 'For Rent' : 'Properties' },
               { n: topViewedProperties.reduce((s,p) => s + (p.views_count || 0), 0).toLocaleString() || '0', l: 'Total Views' },
               { n: propertyTypes.length || '...', l: 'Categories' },
             ].map(({ n, l }, i) => (

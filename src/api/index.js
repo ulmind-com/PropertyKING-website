@@ -65,6 +65,7 @@ export const propertyAPI = {
   update: (id, data) => api.put(`/properties/${id}`, data),
   delete: (id) => api.delete(`/properties/${id}`),
   nearby: (params) => api.get('/properties/nearby', { params }),
+  locations: (params) => api.get('/properties/locations', { params }),
   recommendations: (params) => api.get('/properties/recommendations', { params }),
   myListings: (params) => api.get('/properties/my-listings', { params }),
   myListingsStats: () => api.get('/properties/my-listings/stats'),

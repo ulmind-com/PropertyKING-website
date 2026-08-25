@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { X, MapPin, Locate, Search, Loader2 } from 'lucide-react';
 import L from 'leaflet';
+import { propertyAPI } from '../../api';
 import 'leaflet/dist/leaflet.css';
 
 const DARK_TILE = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
@@ -10,6 +11,9 @@ export default function LocationPickerModal({ isOpen, onClose, onConfirm, initia
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
+  // Set when we move the map ourselves, so the resulting `moveend` does not
+  // reverse-geocode over a label the user explicitly picked.
+  const skipNextMoveEnd = useRef(false);
   const [address, setAddress] = useState('Drag the map or search...');
   const [coords, setCoords] = useState({ lat: initialLat || 22.0, lng: initialLng || 88.0 });
   const [loading, setLoading] = useState(false);
@@ -70,6 +74,7 @@ export default function LocationPickerModal({ isOpen, onClose, onConfirm, initia
         const center = map.getCenter();
         setCoords({ lat: center.lat, lng: center.lng });
         marker.setLatLng(center);
+        if (skipNextMoveEnd.current) { skipNextMoveEnd.current = false; return; }
         reverseGeocode(center.lat, center.lng);
       });
 
@@ -89,29 +94,63 @@ export default function LocationPickerModal({ isOpen, onClose, onConfirm, initia
     }
   }, [isOpen]);
 
-  // Search with Nominatim
-  const handleSearch = async () => {
-    if (!searchText.trim()) return;
+  // Suggest as the user types. Our own listing cities come first — a general
+  // geocoder happily returns places we have no properties in, which lands the
+  // user on an empty result page. Nominatim only fills in when we have no match.
+  useEffect(() => {
+    const q = searchText.trim();
+    if (q.length < 2) { setSearchResults([]); setSearching(false); return; }
+
+    let cancelled = false;
     setSearching(true);
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchText)}&limit=5`);
-      const data = await res.json();
-      setSearchResults(data);
-    } catch { setSearchResults([]); }
-    setSearching(false);
-  };
+    const timer = setTimeout(async () => {
+      let results = [];
+      try {
+        const res = await propertyAPI.locations({ q, limit: 8 });
+        results = (res.data.locations || []).map(l => ({
+          label: l.label,
+          sublabel: `${l.count} propert${l.count === 1 ? 'y' : 'ies'}`,
+          lat: l.lat, lng: l.lng, hasListings: true,
+        }));
+      } catch { /* fall through to the geocoder */ }
+
+      if (!results.length) {
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&countrycodes=us&q=${encodeURIComponent(q)}&limit=5`
+          );
+          results = (await res.json()).map(r => ({
+            label: r.display_name?.split(',').slice(0, 2).join(',').trim(),
+            sublabel: r.display_name?.slice(0, 60),
+            lat: parseFloat(r.lat), lng: parseFloat(r.lon), hasListings: false,
+          }));
+        } catch { results = []; }
+      }
+
+      if (!cancelled) { setSearchResults(results); setSearching(false); }
+    }, 300);
+
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [searchText]);
 
   const selectSearchResult = (item) => {
-    const lat = parseFloat(item.lat);
-    const lng = parseFloat(item.lon);
-    setCoords({ lat, lng });
     setSearchResults([]);
     setSearchText('');
+    if (item.lat == null || item.lng == null) { setAddress(item.label); return; }
+    const lat = Number(item.lat);
+    const lng = Number(item.lng);
+    setCoords({ lat, lng });
+    // Trust our own city label over a reverse lookup of a representative pin,
+    // which resolves to things like "Harris County" instead of "Houston, TX".
+    if (item.hasListings) {
+      skipNextMoveEnd.current = true;
+      setAddress(item.label);
+    }
     if (mapRef.current) {
-      mapRef.current.setView([lat, lng], 14);
+      mapRef.current.setView([lat, lng], 12);
       markerRef.current?.setLatLng([lat, lng]);
     }
-    reverseGeocode(lat, lng);
+    if (!item.hasListings) reverseGeocode(lat, lng);
   };
 
   // Locate me
@@ -175,10 +214,10 @@ export default function LocationPickerModal({ isOpen, onClose, onConfirm, initia
             <Search size={16} color="#999" />
             <input
               type="text"
-              placeholder="Search city, state, zip..."
+              placeholder="Search a city — Los Angeles, Houston, Chicago..."
               value={searchText}
               onChange={e => setSearchText(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              onKeyDown={e => e.key === 'Enter' && searchResults[0] && selectSearchResult(searchResults[0])}
               style={{
                 flex: 1, background: 'transparent', border: 'none', outline: 'none',
                 color: '#fff', padding: '10px 0', fontSize: 14, fontFamily: 'inherit'
@@ -187,23 +226,36 @@ export default function LocationPickerModal({ isOpen, onClose, onConfirm, initia
             {searching && <Loader2 size={16} color="#999" className="animate-spin" />}
           </div>
           {/* Search Results Dropdown */}
-          {searchResults.length > 0 && (
+          {(searchResults.length > 0 || (!searching && searchText.trim().length >= 2)) && (
             <div style={{
-              position: 'absolute', left: 20, right: 20, top: 60, zIndex: 10,
+              // Above Leaflet: its panes sit at z-index 400+ and its controls at
+              // 1000, so a lower value hides the dropdown behind the map.
+              position: 'absolute', left: 20, right: 20, top: 60, zIndex: 1200,
               background: '#252545', borderRadius: 12, overflow: 'hidden',
               boxShadow: '0 8px 24px rgba(0,0,0,0.5)', maxHeight: 200, overflowY: 'auto'
             }}>
               {searchResults.map((r, i) => (
                 <div key={i} onClick={() => selectSearchResult(r)} style={{
                   padding: '10px 16px', cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,0.05)',
-                  color: '#ddd', fontSize: 13, transition: 'background 0.15s'
+                  display: 'flex', alignItems: 'center', gap: 10, transition: 'background 0.15s'
                 }}
-                onMouseEnter={e => e.target.style.background = 'rgba(255,255,255,0.08)'}
-                onMouseLeave={e => e.target.style.background = 'transparent'}>
-                  <MapPin size={12} style={{ display: 'inline', marginRight: 8, verticalAlign: 'middle' }} />
-                  {r.display_name?.slice(0, 80)}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <MapPin size={14} color={r.hasListings ? '#22c55e' : '#777'} style={{ flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>{r.label}</div>
+                    <div style={{
+                      color: r.hasListings ? '#22c55e' : '#888', fontSize: 11, marginTop: 1,
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+                    }}>{r.sublabel}</div>
+                  </div>
                 </div>
               ))}
+              {!searchResults.length && (
+                <div style={{ padding: '12px 16px', color: '#888', fontSize: 12.5 }}>
+                  No match for “{searchText.trim()}”. Try a nearby city.
+                </div>
+              )}
             </div>
           )}
         </div>
